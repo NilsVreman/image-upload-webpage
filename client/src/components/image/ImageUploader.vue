@@ -40,7 +40,9 @@ const fileSizeFilter = (file: File) => {
 };
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
+@import "@/assets/styles/theme";
+
 .uploader-container {
   display: flex;
   justify-content: center;
@@ -52,8 +54,8 @@ const fileSizeFilter = (file: File) => {
   display: inline-block;
   padding: 12px 24px;
   cursor: pointer;
-  background-color: #3cb371; /* Darker green shade */
-  color: #fff;
+  background-color: $color-button-primary; /* Darker green shade */
+  color: $color-text-primary;
   border-radius: 4px;
   position: relative;
   font-size: 16px;
