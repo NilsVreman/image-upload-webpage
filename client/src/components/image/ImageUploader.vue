@@ -5,7 +5,7 @@
       <input
         type="file"
         multiple
-        :accept="acceptedFileTypes"
+        :accept="acceptedMimeTypes"
         @change="handleFileUpload"
       />
     </label>
@@ -13,22 +13,21 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from "vue";
 import { acceptedMimeTypes, maximumFileSize } from "@/constants/fileConstants";
 
-const selectedFiles = ref<File[]>([]);
+const emit = defineEmits<{
+  filesSelected: (files: File[]) => void;
+}>();
 
 // Handle file selection
 const handleFileUpload = (event: Event) => {
   const target = event.target as HTMLInputElement;
   if (target.files) {
-    selectedFiles.value = Array.from(target.files).filter((file) => {
+    const validFiles = Array.from(target.files).filter((file) => {
       return fileTypeFilter(file) && fileSizeFilter(file);
     });
 
-    selectedFiles.value.forEach((file) => {
-      console.log("Selected file:", file);
-    });
+    emit("filesSelected", validFiles);
   }
 };
 
@@ -47,7 +46,7 @@ const fileSizeFilter = (file: File) => {
   display: flex;
   justify-content: center;
   align-items: center;
-  height: 100vh; /* Full viewport height */
+  height: auto;
 }
 
 .custom-file-upload {

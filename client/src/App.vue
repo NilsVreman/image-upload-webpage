@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import ImageUploader from "./components/image/ImageUploader.vue";
+import ImagePage from "./components/image/ImagePage.vue";
 </script>
 
 <template>
-  <ImageUploader />
+  <ImagePage />
 </template>
