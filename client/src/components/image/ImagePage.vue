@@ -1,7 +1,10 @@
 <template>
   <div class="container">
-    <ImageUploader @files-selected="onFilesSelected" />
-    <ThumbnailPreviewer :images="images" />
+    <ImageUploader @files-selected="selectedFiles = $event" />
+    <ThumbnailPreviewer
+      :new-files="selectedFiles"
+      :maximum-number-thumbnails="10"
+    />
   </div>
 </template>
 
@@ -10,29 +13,15 @@ import { ref } from "vue";
 import ImageUploader from "./ImageUploader.vue";
 import ThumbnailPreviewer from "./ThumbnailPreviewer.vue";
 
-const images = ref<ThumbnailPreviewer.ImagePreview[]>([]);
-
-const onFilesSelected = (files: File[]) => {
-  // Revoke existing image URLs
-  images.value.forEach((image) => {
-    URL.revokeObjectURL(image.url);
-  });
-  images.value = [];
-
-  // Create image previews
-  files.forEach((file) => {
-    const url = URL.createObjectURL(file);
-    images.value.push({
-      url,
-      name: file.name,
-    });
-  });
-};
+const selectedFiles = ref<File[]>([]);
 </script>
 
 <style scoped>
 .container {
+  display: flex;
   flex-direction: column;
   align-items: center;
+  gap: 10px;
+  padding: 20px;
 }
 </style>
