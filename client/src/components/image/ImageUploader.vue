@@ -16,27 +16,23 @@
 import { acceptedMimeTypes, maximumFileSize } from "@/constants/fileConstants";
 
 const emit = defineEmits<{
-  filesSelected: (files: File[]) => void;
+  selectedFiles: (files: File[]) => void;
 }>();
 
 // Handle file selection
 const handleFileUpload = (event: Event) => {
   const target = event.target as HTMLInputElement;
-  if (target.files) {
-    const validFiles = Array.from(target.files).filter((file) => {
-      return fileTypeFilter(file) && fileSizeFilter(file);
-    });
-
-    emit("filesSelected", validFiles);
-  }
+  const validFiles = parseSelectedFiles(target.files);
+  emit("selectedFiles", validFiles);
 };
 
-const fileTypeFilter = (file: File) => {
-  return acceptedMimeTypes.includes(file.type);
-};
-const fileSizeFilter = (file: File) => {
-  return file.size < maximumFileSize;
-};
+const parseSelectedFiles = (files?: FileList) =>
+  files
+    ? [...files].filter(
+        ({ type, size }) =>
+          acceptedMimeTypes.includes(type) && size < maximumFileSize,
+      )
+    : undefined;
 </script>
 
 <style lang="scss" scoped>

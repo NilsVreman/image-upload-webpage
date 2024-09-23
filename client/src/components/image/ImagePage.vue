@@ -1,6 +1,6 @@
 <template>
   <div class="container">
-    <ImageUploader @files-selected="selectedFiles = $event" />
+    <ImageUploader @selected-files="selectedFiles = $event" />
     <ThumbnailPreviewer
       :new-files="selectedFiles"
       :maximum-number-thumbnails="10"
