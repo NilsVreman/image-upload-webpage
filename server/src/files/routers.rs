@@ -1,6 +1,11 @@
-use super::handlers::upload_handler;
-use axum::{routing::get, Router};
+use super::handlers;
+use axum::{
+    routing::{get, post},
+    Router,
+};
 
-pub fn create_files_router() -> Router {
-    Router::new().route("/files", get(upload_handler))
+pub fn create_file_router() -> Router {
+    Router::new()
+        .route("/", get(|| async { "Hello, World!" }))
+        .route("/", post(handlers::file_upload_handler))
 }
