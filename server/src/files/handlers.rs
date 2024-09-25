@@ -1,19 +1,10 @@
-use super::storage;
-
-use axum::extract::multipart::Field;
+use super::{errors::FileUploadError, storage};
 use axum::{
-    extract::Multipart,
+    extract::{multipart::Field, Multipart},
     http::StatusCode,
     response::{IntoResponse, Response},
+    Json,
 };
-
-pub struct FileUploadError(String);
-
-impl IntoResponse for FileUploadError {
-    fn into_response(self) -> Response {
-        (StatusCode::INTERNAL_SERVER_ERROR, self.0).into_response()
-    }
-}
 
 pub trait OptionSanitize {
     fn sanitize(&self) -> Option<String>;
@@ -26,52 +17,58 @@ impl OptionSanitize for Option<&str> {
 }
 
 pub async fn file_upload_handler(mut files: Multipart) -> Result<Response, FileUploadError> {
-    storage::create_uploads_folder()
+    storage::ensure_folder_exists()
         .await
-        .map_err(|err| FileUploadError(format!("Failed to create uploads folder: {}", err)))?;
+        .map_err(|err| FileUploadError::CreateFolderError(err.to_string()))?;
 
     while let Some(file) = files
         .next_field()
         .await
-        .map_err(|_| FileUploadError("Failed to read field".to_string()))?
+        .map_err(|err| FileUploadError::MultipartError(err.to_string()))?
     {
-        assert_valid_file(&file)?;
+        assert_file_validity(&file)?;
 
         let sanitized_name = file
             .file_name()
             .sanitize()
-            .ok_or(FileUploadError("Missing Filename".to_string()))?;
+            .ok_or(FileUploadError::InvalidContentType("file_name".to_string()))?;
 
         let image_data = file
             .bytes()
             .await
-            .map_err(|err| FileUploadError(format!("Failed to read file data: {}", err)))?;
+            .map_err(|err| FileUploadError::ReadFileError(err.to_string()))?;
 
-        storage::write_to_uploads(sanitized_name, image_data)
+        storage::write_to_uploads(&sanitized_name, &image_data)
             .await
-            .map_err(|err| FileUploadError(format!("Failed to write file to disk: {}", err)))?;
+            .map_err(|err| FileUploadError::WriteFileError(err.to_string()))?;
+
+        tracing::info!("File uploaded: {}", sanitized_name);
     }
 
     Ok((
         StatusCode::CREATED,
-        "Files uploaded successfully".to_owned(),
+        Json(serde_json::json!({"msg": "Files uploaded successfully".to_owned()})),
     )
         .into_response())
 }
 
-fn assert_valid_file(field: &Field) -> Result<(), FileUploadError> {
+fn assert_file_validity(field: &Field) -> Result<(), FileUploadError> {
     field
         .file_name()
         .sanitize()
-        .ok_or(FileUploadError("Missing Filename".to_string()))?;
+        .ok_or(FileUploadError::InvalidContentType("file_name".to_string()))?;
 
-    if !field
+    if field
         .content_type()
-        .ok_or(FileUploadError("Missing Content Type".to_string()))?
+        .ok_or(FileUploadError::InvalidContentType(
+            "content_type".to_string(),
+        ))?
         .starts_with("image/")
     {
-        return Err(FileUploadError("Invalid Content Type".to_string()));
+        return Ok(());
     }
 
-    Ok(())
+    Err(FileUploadError::InvalidContentType(
+        "content_type".to_string(),
+    ))
 }
