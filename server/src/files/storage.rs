@@ -1,32 +1,35 @@
-use bytes::Bytes;
-use std::fs;
-use std::io::Write;
+use std::io;
 use std::path::PathBuf;
-use uuid::Uuid;
 
-pub async fn store_file(file_name: String, data: Bytes) -> Result<(), String> {
-    // Resolve the upload directory
-    let mut upload_dir = std::env::current_dir().unwrap();
-    upload_dir.push("uploads");
+use bytes::Bytes;
 
-    // Create the directory if it doesn't exist
-    if !upload_dir.exists() {
-        fs::create_dir_all(&upload_dir)
-            .map_err(|e| format!("Failed to create upload directory: {}", e))?;
+const UPLOADS_FOLDER: &str = "uploads";
+
+fn get_uploads_folder() -> io::Result<PathBuf> {
+    std::env::current_dir().map(|x| x.join(UPLOADS_FOLDER))
+}
+
+async fn create_folder(folder: PathBuf) -> io::Result<()> {
+    if !folder.exists() {
+        tokio::fs::create_dir_all(&folder).await
+    } else {
+        Err(io::Error::new(
+            io::ErrorKind::AlreadyExists,
+            "Uploads folder already exists",
+        ))
     }
+}
 
-    // Generate a unique file name
-    let unique_file_name = format!("{}_{}", Uuid::new_v4(), file_name);
+pub async fn create_uploads_folder() -> io::Result<()> {
+    match get_uploads_folder() {
+        Ok(uploads) => create_folder(uploads).await,
+        Err(_) => Err(io::Error::new(
+            io::ErrorKind::NotFound,
+            "Couldn't resolve uploads folder",
+        )),
+    }
+}
 
-    // Full path to the file
-    let mut file_path = PathBuf::from(&upload_dir);
-    file_path.push(unique_file_name);
-
-    // Write the file
-    let mut file =
-        fs::File::create(&file_path).map_err(|e| format!("Failed to create file: {}", e))?;
-    file.write_all(&data)
-        .map_err(|e| format!("Failed to write file: {}", e))?;
-
-    Ok(())
+pub async fn write_to_uploads(file_name: String, image_data: Bytes) -> io::Result<()> {
+    tokio::fs::write(get_uploads_folder()?.join(&file_name), &image_data).await
 }
