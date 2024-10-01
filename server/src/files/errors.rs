@@ -22,17 +22,16 @@ pub enum FileUploadError {
 impl response::IntoResponse for FileUploadError {
     fn into_response(self) -> response::Response {
         tracing::error!("Error occurred: {}", self);
-        (
-            match &self {
-                FileUploadError::MultipartError(_) | FileUploadError::InvalidContentType(_) => {
-                    StatusCode::BAD_REQUEST
-                }
-                FileUploadError::CreateFolderError(_)
-                | FileUploadError::ReadFileError(_)
-                | FileUploadError::WriteFileError(_) => StatusCode::INTERNAL_SERVER_ERROR,
-            },
-            Json(serde_json::json!({"error": self.to_string()})),
-        )
-            .into_response()
+
+        let code = match &self {
+            FileUploadError::MultipartError(_) | FileUploadError::InvalidContentType(_) => {
+                StatusCode::BAD_REQUEST
+            }
+            FileUploadError::CreateFolderError(_)
+            | FileUploadError::ReadFileError(_)
+            | FileUploadError::WriteFileError(_) => StatusCode::INTERNAL_SERVER_ERROR,
+        };
+
+        (code, Json(serde_json::json!({"error": self.to_string()}))).into_response()
     }
 }

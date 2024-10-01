@@ -1,34 +1,40 @@
 use super::{errors::FileUploadError, storage};
-use axum::{
-    extract::{multipart::Field, Multipart},
-    http::StatusCode,
-    response::{IntoResponse, Response},
-    Json,
-};
+use axum::extract::{multipart::Field, Json, Multipart};
+use serde::Serialize;
 
-pub trait OptionSanitize {
+pub trait Sanitize {
     fn sanitize(&self) -> Option<String>;
 }
 
-impl OptionSanitize for Option<&str> {
+impl Sanitize for Option<&str> {
     fn sanitize(&self) -> Option<String> {
         self.map(|s| s.replace(&['/', '\\', ':', '*', '?', '"', '<', '>', '|'][..], ""))
     }
 }
 
-pub async fn file_upload_handler(mut files: Multipart) -> Result<Response, FileUploadError> {
-    storage::ensure_folder_exists()
+#[derive(Serialize)]
+pub struct FileUploadResponse {
+    msg: String,
+    name: String,
+}
+
+pub async fn image_upload_handler(
+    mut files: Multipart,
+) -> Result<Json<FileUploadResponse>, FileUploadError> {
+    storage::ensure_uploads_folder_exists()
         .await
         .map_err(|err| FileUploadError::CreateFolderError(err.to_string()))?;
+
+    let mut sanitized_name = String::new();
 
     while let Some(file) = files
         .next_field()
         .await
         .map_err(|err| FileUploadError::MultipartError(err.to_string()))?
     {
-        assert_file_validity(&file)?;
+        assert_image_validity(&file)?;
 
-        let sanitized_name = file
+        sanitized_name = file
             .file_name()
             .sanitize()
             .ok_or(FileUploadError::InvalidContentType("file_name".to_string()))?;
@@ -45,14 +51,13 @@ pub async fn file_upload_handler(mut files: Multipart) -> Result<Response, FileU
         tracing::info!("File uploaded: {}", sanitized_name);
     }
 
-    Ok((
-        StatusCode::CREATED,
-        Json(serde_json::json!({"msg": "Files uploaded successfully".to_owned()})),
-    )
-        .into_response())
+    Ok(Json(FileUploadResponse {
+        msg: "Files uploaded successfully".to_string(),
+        name: sanitized_name,
+    }))
 }
 
-fn assert_file_validity(field: &Field) -> Result<(), FileUploadError> {
+fn assert_image_validity(field: &Field) -> Result<(), FileUploadError> {
     field
         .file_name()
         .sanitize()

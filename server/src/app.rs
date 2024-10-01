@@ -1,16 +1,12 @@
 use super::files::routers;
-use axum::{response::IntoResponse, routing::get, Json, Router};
+use axum::{routing::get, Json, Router};
 
 pub fn create_app() -> Router {
     Router::new()
         .route("/health", get(health_handler))
-        .nest("/files", routers::create_file_router())
+        .nest("/", routers::create_image_router())
 }
 
-async fn health_handler() -> axum::response::Response {
-    (
-        axum::http::StatusCode::OK,
-        Json(serde_json::json!({"health": "OK"})),
-    )
-        .into_response()
+async fn health_handler() -> Json<serde_json::Value> {
+    Json(serde_json::json!({"health": "OK"}))
 }
