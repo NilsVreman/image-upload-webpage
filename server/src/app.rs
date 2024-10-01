@@ -8,5 +8,6 @@ pub fn create_app() -> Router {
 }
 
 async fn health_handler() -> Json<serde_json::Value> {
+    dbg!("Healthy");
     Json(serde_json::json!({"health": "OK"}))
 }

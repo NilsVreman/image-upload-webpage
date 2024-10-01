@@ -21,7 +21,7 @@ pub enum FileUploadError {
 
 impl response::IntoResponse for FileUploadError {
     fn into_response(self) -> response::Response {
-        tracing::error!("Error occurred: {}", self);
+        dbg!(&self);
 
         let code = match &self {
             FileUploadError::MultipartError(_) | FileUploadError::InvalidContentType(_) => {

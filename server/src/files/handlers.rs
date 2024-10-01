@@ -48,7 +48,7 @@ pub async fn image_upload_handler(
             .await
             .map_err(|err| FileUploadError::WriteFileError(err.to_string()))?;
 
-        tracing::info!("File uploaded: {}", sanitized_name);
+        dbg!("File uploaded: {}", &sanitized_name);
     }
 
     Ok(Json(FileUploadResponse {
