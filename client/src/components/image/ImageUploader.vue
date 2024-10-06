@@ -14,28 +14,50 @@
 
 <script setup lang="ts">
 import { acceptedMimeTypes, maximumFileSize } from "@/constants/fileConstants";
+import axios from "axios";
 
 const emit = defineEmits<{
-  filesSelected: (files: File[]) => void;
+  selectedFiles: (files: File[]) => void;
 }>();
 
 // Handle file selection
-const handleFileUpload = (event: Event) => {
+const handleFileUpload = async (event: Event) => {
   const target = event.target as HTMLInputElement;
-  if (target.files) {
-    const validFiles = Array.from(target.files).filter((file) => {
-      return fileTypeFilter(file) && fileSizeFilter(file);
-    });
-
-    emit("filesSelected", validFiles);
+  const validFiles = selectValidFiles(target.files);
+  const uploadedSuccessfully = await uploadFiles(validFiles);
+  if (uploadedSuccessfully) {
+    emit("selectedFiles", validFiles);
   }
 };
 
-const fileTypeFilter = (file: File) => {
-  return acceptedMimeTypes.includes(file.type);
-};
-const fileSizeFilter = (file: File) => {
-  return file.size < maximumFileSize;
+const selectValidFiles = (files?: FileList) =>
+  files
+    ? [...files].filter(
+        ({ type, size }) =>
+          acceptedMimeTypes.includes(type) && size < maximumFileSize,
+      )
+    : undefined;
+
+const uploadFiles = async (files: File[]): Promise<boolean> => {
+  const formData = new FormData();
+  files.forEach((file) => {
+    formData.append("files", file);
+  });
+  console.log("Uploading files", formData.getAll("files"));
+  return await axios
+    .post("http://localhost:3000/images", formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    })
+    .then((response) => {
+      console.log(response);
+      return true;
+    })
+    .catch((error) => {
+      console.error("Error uploading files", error);
+      return false;
+    });
 };
 </script>
 
