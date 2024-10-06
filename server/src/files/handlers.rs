@@ -22,18 +22,20 @@ impl Sanitize for String {
 }
 
 #[derive(Serialize)]
-pub struct FileUploadResponse {
-    msg: String,
+pub struct ImageMetaData {
+    file_name: String,
+    image_url: String,
+    thumbnail_url: String,
 }
 
 #[derive(Serialize)]
-pub struct FileList {
-    files: Vec<String>,
+pub struct ImageList {
+    images: Vec<ImageMetaData>,
 }
 
 pub async fn post_image_list(
     mut images: Multipart,
-) -> Result<Json<FileUploadResponse>, FileUploadError> {
+) -> Result<Json<serde_json::Value>, FileUploadError> {
     storage::ensure_uploads_folder_exists()
         .await
         .map_err(|err| FileUploadError::CreateFolderError(err.to_string()))?;
@@ -62,9 +64,9 @@ pub async fn post_image_list(
         dbg!("File uploaded: {}", &sanitized_name);
     }
 
-    Ok(Json(FileUploadResponse {
-        msg: "Files uploaded successfully".to_string(),
-    }))
+    Ok(Json(serde_json::json!(
+        "Files uploaded successfully".to_string()
+    )))
 }
 
 pub async fn get_image(
@@ -77,11 +79,18 @@ pub async fn get_image(
     Ok((StatusCode::OK, image))
 }
 
-pub async fn get_image_list() -> Result<Json<FileList>, FileUploadError> {
-    Ok(Json(FileList {
-        files: storage::get_all_image_names()
+pub async fn get_image_list() -> Result<Json<ImageList>, FileUploadError> {
+    Ok(Json(ImageList {
+        images: storage::get_all_image_names()
             .await
-            .map_err(|err| FileUploadError::ReadFileError(err.to_string()))?,
+            .map_err(|err| FileUploadError::ReadFileError(err.to_string()))?
+            .iter()
+            .map(|file_name| ImageMetaData {
+                file_name: file_name.clone(),
+                image_url: format!("/images/{}", file_name),
+                thumbnail_url: format!("/thumbnails/{}", file_name),
+            })
+            .collect(),
     }))
 }
 
