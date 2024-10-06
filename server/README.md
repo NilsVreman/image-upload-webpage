@@ -4,9 +4,11 @@
 ### ToDo:
 
 1. investigate `tracing.rs`
-2. Abstractions for storage, etc.
-3. Additional tests.
-4. Additional sanitization checks
-5. Unique ID generation
-6. GET Method
-7. Videos
+2. > [!WARNING]
+   > Extremely slow image upload.
+3. Abstractions for storage, etc.
+4. Additional tests.
+5. Additional sanitization checks
+6. Unique ID generation
+7. GET Method
+8. Videos

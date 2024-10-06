@@ -1,10 +1,15 @@
 use super::{errors::FileUploadError, storage};
+
 use axum::{
     body,
     extract::{multipart::Field, Json, Multipart, Path},
     http::StatusCode,
 };
+use image::ImageFormat;
 use serde::Serialize;
+use std::io::Cursor;
+
+const MAX_THUMBNAILS_SIZE: u32 = 150;
 
 pub trait Sanitize {
     fn sanitize(&self) -> Option<String>;
@@ -36,9 +41,7 @@ pub struct ImageList {
 pub async fn post_image_list(
     mut images: Multipart,
 ) -> Result<Json<serde_json::Value>, FileUploadError> {
-    storage::ensure_uploads_folder_exists()
-        .await
-        .map_err(|err| FileUploadError::CreateFolderError(err.to_string()))?;
+    setup_folders().await?;
 
     while let Some(file) = images
         .next_field()
@@ -61,7 +64,17 @@ pub async fn post_image_list(
             .await
             .map_err(|err| FileUploadError::WriteFileError(err.to_string()))?;
 
-        dbg!("File uploaded: {}", &sanitized_name);
+        let mut thumbnail = Cursor::new(Vec::new());
+        let _ = image::load_from_memory(&image_data)
+            .map_err(|err| FileUploadError::ProcessingError(err.to_string()))?
+            .thumbnail(MAX_THUMBNAILS_SIZE, MAX_THUMBNAILS_SIZE)
+            .write_to(&mut thumbnail, ImageFormat::Jpeg);
+
+        storage::write_thumbnail(&sanitized_name, &body::Bytes::from(thumbnail.into_inner()))
+            .await
+            .map_err(|err| FileUploadError::WriteFileError(err.to_string()))?;
+
+        dbg!("File and thumbnail uploaded: {}", &sanitized_name);
     }
 
     Ok(Json(serde_json::json!(
@@ -92,6 +105,20 @@ pub async fn get_image_list() -> Result<Json<ImageList>, FileUploadError> {
             })
             .collect(),
     }))
+}
+
+async fn setup_folders() -> Result<(), FileUploadError> {
+    let image_folder = storage::get_folder(storage::ImageType::Image)
+        .map_err(|err| FileUploadError::CreateFolderError(err.to_string()))?;
+    let thumbnail_folder = storage::get_folder(storage::ImageType::Thumbnail)
+        .map_err(|err| FileUploadError::CreateFolderError(err.to_string()))?;
+
+    storage::ensure_folder_exists(&image_folder)
+        .await
+        .map_err(|err| FileUploadError::CreateFolderError(err.to_string()))?;
+    storage::ensure_folder_exists(&thumbnail_folder)
+        .await
+        .map_err(|err| FileUploadError::CreateFolderError(err.to_string()))
 }
 
 fn assert_image_validity(field: &Field) -> Result<(), FileUploadError> {
