@@ -1,5 +1,9 @@
 use super::{errors::FileUploadError, storage};
-use axum::extract::{multipart::Field, Json, Multipart};
+use axum::{
+    body,
+    extract::{multipart::Field, Json, Multipart, Path},
+    http::StatusCode,
+};
 use serde::Serialize;
 
 pub trait Sanitize {
@@ -11,30 +15,37 @@ impl Sanitize for Option<&str> {
         self.map(|s| s.replace(&['/', '\\', ':', '*', '?', '"', '<', '>', '|'][..], ""))
     }
 }
+impl Sanitize for String {
+    fn sanitize(&self) -> Option<String> {
+        Some(self.replace(&['/', '\\', ':', '*', '?', '"', '<', '>', '|'][..], ""))
+    }
+}
 
 #[derive(Serialize)]
 pub struct FileUploadResponse {
     msg: String,
-    name: String,
 }
 
-pub async fn image_upload_handler(
-    mut files: Multipart,
+#[derive(Serialize)]
+pub struct FileList {
+    files: Vec<String>,
+}
+
+pub async fn post_image_list(
+    mut images: Multipart,
 ) -> Result<Json<FileUploadResponse>, FileUploadError> {
     storage::ensure_uploads_folder_exists()
         .await
         .map_err(|err| FileUploadError::CreateFolderError(err.to_string()))?;
 
-    let mut sanitized_name = String::new();
-
-    while let Some(file) = files
+    while let Some(file) = images
         .next_field()
         .await
         .map_err(|err| FileUploadError::MultipartError(err.to_string()))?
     {
         assert_image_validity(&file)?;
 
-        sanitized_name = file
+        let sanitized_name = file
             .file_name()
             .sanitize()
             .ok_or(FileUploadError::InvalidContentType("file_name".to_string()))?;
@@ -44,7 +55,7 @@ pub async fn image_upload_handler(
             .await
             .map_err(|err| FileUploadError::ReadFileError(err.to_string()))?;
 
-        storage::write_to_uploads(&sanitized_name, &image_data)
+        storage::write_image(&sanitized_name, &image_data)
             .await
             .map_err(|err| FileUploadError::WriteFileError(err.to_string()))?;
 
@@ -53,7 +64,24 @@ pub async fn image_upload_handler(
 
     Ok(Json(FileUploadResponse {
         msg: "Files uploaded successfully".to_string(),
-        name: sanitized_name,
+    }))
+}
+
+pub async fn get_image(
+    Path(file_name): Path<String>,
+) -> Result<(StatusCode, body::Bytes), FileUploadError> {
+    let image = storage::read_image(&file_name.sanitize().expect("Invalid file name"))
+        .await
+        .map_err(|err| FileUploadError::ReadFileError(err.to_string()))?;
+
+    Ok((StatusCode::OK, image))
+}
+
+pub async fn get_image_list() -> Result<Json<FileList>, FileUploadError> {
+    Ok(Json(FileList {
+        files: storage::get_all_image_names()
+            .await
+            .map_err(|err| FileUploadError::ReadFileError(err.to_string()))?,
     }))
 }
 
