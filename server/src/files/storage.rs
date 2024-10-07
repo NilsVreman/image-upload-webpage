@@ -27,20 +27,16 @@ pub async fn ensure_folder_exists(folder: &PathBuf) -> io::Result<()> {
     Ok(())
 }
 
-pub async fn write_image(file_name: &String, image_data: &body::Bytes) -> io::Result<()> {
-    tokio::fs::write(get_folder(ImageType::Image)?.join(&file_name), &image_data).await
+pub async fn write_image(
+    file_name: &String,
+    image_data: &body::Bytes,
+    image_type: ImageType,
+) -> io::Result<()> {
+    tokio::fs::write(get_folder(image_type)?.join(&file_name), &image_data).await
 }
 
-pub async fn write_thumbnail(file_name: &String, image_data: &body::Bytes) -> io::Result<()> {
-    tokio::fs::write(
-        get_folder(ImageType::Thumbnail)?.join(&file_name),
-        &image_data,
-    )
-    .await
-}
-
-pub async fn read_image(file_name: &String) -> io::Result<body::Bytes> {
-    tokio::fs::read(get_folder(ImageType::Image)?.join(&file_name))
+pub async fn read_image(file_name: &String, image_type: ImageType) -> io::Result<body::Bytes> {
+    tokio::fs::read(get_folder(image_type)?.join(&file_name))
         .await
         .map(|data| axum::body::Bytes::from(data))
 }

@@ -22,13 +22,13 @@ impl Sanitize for Option<&str> {
 }
 impl Sanitize for String {
     fn sanitize(&self) -> Option<String> {
-        Some(self.replace(&['/', '\\', ':', '*', '?', '"', '<', '>', '|'][..], ""))
+        Some(&self[..]).sanitize()
     }
 }
 
 #[derive(Serialize)]
 pub struct ImageMetaData {
-    file_name: String,
+    name: String,
     image_url: String,
     thumbnail_url: String,
 }
@@ -60,7 +60,7 @@ pub async fn post_image_list(
             .await
             .map_err(|err| FileUploadError::ReadFileError(err.to_string()))?;
 
-        storage::write_image(&sanitized_name, &image_data)
+        storage::write_image(&sanitized_name, &image_data, storage::ImageType::Image)
             .await
             .map_err(|err| FileUploadError::WriteFileError(err.to_string()))?;
 
@@ -70,9 +70,13 @@ pub async fn post_image_list(
             .thumbnail(MAX_THUMBNAILS_SIZE, MAX_THUMBNAILS_SIZE)
             .write_to(&mut thumbnail, ImageFormat::Jpeg);
 
-        storage::write_thumbnail(&sanitized_name, &body::Bytes::from(thumbnail.into_inner()))
-            .await
-            .map_err(|err| FileUploadError::WriteFileError(err.to_string()))?;
+        storage::write_image(
+            &sanitized_name,
+            &body::Bytes::from(thumbnail.into_inner()),
+            storage::ImageType::Thumbnail,
+        )
+        .await
+        .map_err(|err| FileUploadError::WriteFileError(err.to_string()))?;
 
         dbg!("File and thumbnail uploaded: {}", &sanitized_name);
     }
@@ -83,13 +87,30 @@ pub async fn post_image_list(
 }
 
 pub async fn get_image(
-    Path(file_name): Path<String>,
+    Path(name): Path<String>,
 ) -> Result<(StatusCode, body::Bytes), FileUploadError> {
-    let image = storage::read_image(&file_name.sanitize().expect("Invalid file name"))
-        .await
-        .map_err(|err| FileUploadError::ReadFileError(err.to_string()))?;
+    Ok((
+        StatusCode::OK,
+        read_image_from_storage(&name, storage::ImageType::Image).await?,
+    ))
+}
 
-    Ok((StatusCode::OK, image))
+pub async fn get_thumbnail(
+    Path(name): Path<String>,
+) -> Result<(StatusCode, body::Bytes), FileUploadError> {
+    Ok((
+        StatusCode::OK,
+        read_image_from_storage(&name, storage::ImageType::Thumbnail).await?,
+    ))
+}
+
+async fn read_image_from_storage(
+    name: &str,
+    image_type: storage::ImageType,
+) -> Result<body::Bytes, FileUploadError> {
+    storage::read_image(&name.to_string(), image_type)
+        .await
+        .map_err(|err| FileUploadError::ReadFileError(err.to_string()))
 }
 
 pub async fn get_image_list() -> Result<Json<ImageList>, FileUploadError> {
@@ -98,10 +119,10 @@ pub async fn get_image_list() -> Result<Json<ImageList>, FileUploadError> {
             .await
             .map_err(|err| FileUploadError::ReadFileError(err.to_string()))?
             .iter()
-            .map(|file_name| ImageMetaData {
-                file_name: file_name.clone(),
-                image_url: format!("/images/{}", file_name),
-                thumbnail_url: format!("/thumbnails/{}", file_name),
+            .map(|name| ImageMetaData {
+                name: name.clone(),
+                image_url: format!("/api/images/{}", name), // NOTE: these have to match routes
+                thumbnail_url: format!("/api/images/{}/thumbnail", name),
             })
             .collect(),
     }))
