@@ -1,22 +1,25 @@
 <template>
   <div class="thumbnails">
     <div v-for="(file, index) in files" :key="index" class="thumbnail">
-      <img :src="file.url" :alt="file.name" />
+      <img :src="file.thumbnail_url" :alt="file.name" />
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, watch } from "vue";
+import { ref, watch, onMounted } from "vue";
+import axios from "axios";
 
-interface ImagePreview {
-  url: string;
+interface ImageMetaData {
   name: string;
+  image_url: string;
+  thumbnail_url: string;
 }
 
+// TODO: Change this into something more appropriate
 const props = withDefaults(
   defineProps<{
-    newFiles: ImagePreview[];
+    newFiles: ImageMetaData[];
     maximumNumberThumbnails?: number;
   }>(),
   {
@@ -24,14 +27,20 @@ const props = withDefaults(
   },
 );
 
-const files = ref<ImagePreview[]>([]);
+const files = ref<ImageMetaData[]>([]);
 
+// TODO: Change this into something more appropriate
 watch(
+  // Watch for new files
   () => props.newFiles,
   (newFiles) => {
     newFiles.forEach((file) => {
       const url = URL.createObjectURL(file);
-      const newImage: ImagePreview = { url, name: file.name };
+      const newImage: ImageMetaData = {
+        image_url: url,
+        thumbnail_url: url,
+        name: file.name,
+      };
 
       files.value.unshift(newImage);
       console.warn("Don't forget to remove duplicates");
@@ -43,6 +52,19 @@ watch(
     });
   },
 );
+
+onMounted(async () => {
+  await axios
+    .get("/api/images")
+    .then((response) =>
+      response.data.images.forEach((image: ImageMetaData) => {
+        files.value.push(image);
+      }),
+    )
+    .catch((error) => {
+      console.error("Error fetching images onMounted", error);
+    });
+});
 </script>
 
 <style scoped>
@@ -86,8 +108,8 @@ watch(
   border: 1px solid #ccc;
   padding: 5px;
   display: flex;
-  justify-content: center; /* Horizontally center */
-  align-items: center; /* Vertically center */
+  justify-content: center;
+  align-items: center;
   box-sizing: border-box; /* Ensure padding and border are included in width and height */
 }
 

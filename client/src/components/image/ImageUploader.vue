@@ -43,9 +43,11 @@ const uploadFiles = async (files: File[]): Promise<boolean> => {
   files.forEach((file) => {
     formData.append("files", file);
   });
+
   console.log("Uploading files", formData.getAll("files"));
+
   return await axios
-    .post("http://localhost:3000/images", formData, {
+    .post("/api/images", formData, {
       headers: {
         "Content-Type": "multipart/form-data",
       },
