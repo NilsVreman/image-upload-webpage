@@ -6,7 +6,8 @@ use axum::{
 
 pub fn create_image_router() -> Router {
     Router::new()
-        .route("/images", post(handlers::post_image_list))
-        .route("/images", get(handlers::get_image_list))
-        .route("/images/:image_name", get(handlers::get_image))
+        .route("/", post(handlers::post_image_list))
+        .route("/", get(handlers::get_image_list))
+        .route("/:image_name", get(handlers::get_image))
+        .route("/:image_name/thumbnail", get(handlers::get_thumbnail))
 }
