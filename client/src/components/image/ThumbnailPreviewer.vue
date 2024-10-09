@@ -1,10 +1,40 @@
 <template>
   <div class="thumbnails">
-    <div v-for="(file, index) in files" :key="index" class="thumbnail">
-      <img :src="file.thumbnail_url" :alt="file.name" />
+    <div
+      v-for="(file, index) in files"
+      :key="index"
+      class="thumbnail"
+    >
+      <img
+        :src="file.thumbnail_url"
+        :alt="file.name"
+      />
     </div>
   </div>
 </template>
+<!--- <template>
+  <div class="thumbnails">
+    <div v-if="isLoading">Loading...</div>
+    <div v-else>
+      <div
+        v-for="(file, index) in files"
+        :key="index"
+        class="thumbnail"
+      >
+        <img
+          :src="file.thumbnail_url"
+          :alt="file.name"
+        />
+      </div>
+    </div>
+    <div
+      v-if="error"
+      class="error"
+    >
+      {{ error }}
+    </div>
+  </div>
+</template> ---->
 
 <script setup lang="ts">
 import { ref, watch, onMounted } from "vue";
@@ -70,41 +100,14 @@ onMounted(async () => {
 <style scoped>
 .thumbnails {
   display: grid;
+  grid-template: auto / repeat(5, minmax(100px, 1fr));
   gap: 10px;
   margin-top: 10px;
 }
 
-@media (min-width: 1200px) {
-  .thumbnails {
-    grid-template-columns: repeat(5, 1fr);
-    grid-template-rows: repeat(2, 1fr);
-  }
-}
-
-@media (min-width: 800px) and (max-width: 1199px) {
-  .thumbnails {
-    grid-template-columns: repeat(4, 1fr);
-    grid-template-rows: repeat(3, 1fr);
-  }
-}
-
-@media (min-width: 600px) and (max-width: 799px) {
-  .thumbnails {
-    grid-template-columns: repeat(3, 1fr);
-    grid-template-rows: repeat(4, 1fr);
-  }
-}
-
-@media (max-width: 599px) {
-  .thumbnails {
-    grid-template-columns: repeat(2, 1fr);
-    grid-template-rows: repeat(5, 1fr);
-  }
-}
-
 .thumbnail {
-  max-width: 150px;
-  max-height: 150px;
+  max-width: 100px;
+  max-height: 100px;
   border: 1px solid #ccc;
   padding: 5px;
   display: flex;

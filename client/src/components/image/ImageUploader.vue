@@ -24,8 +24,8 @@ const emit = defineEmits<{
 const handleFileUpload = async (event: Event) => {
   const target = event.target as HTMLInputElement;
   const validFiles = selectValidFiles(target.files);
-  const uploadedSuccessfully = await uploadFiles(validFiles);
-  if (uploadedSuccessfully) {
+  const success = await uploadFiles(validFiles);
+  if (success) {
     emit("selectedFiles", validFiles);
   }
 };
@@ -39,27 +39,26 @@ const selectValidFiles = (files?: FileList) =>
     : undefined;
 
 const uploadFiles = async (files: File[]): Promise<boolean> => {
-  const formData = new FormData();
-  files.forEach((file) => {
+  let uploadedSuccessfully = true;
+
+  // Upload each file as a separate request to avoid multipart form data size limits
+  files.forEach(async (file) => {
+    const formData = new FormData();
     formData.append("files", file);
+
+    await axios
+      .post("/api/images", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      })
+      .catch((error) => {
+        console.error("Error uploading file", error);
+        uploadedSuccessfully = false;
+      });
   });
 
-  console.log("Uploading files", formData.getAll("files"));
-
-  return await axios
-    .post("/api/images", formData, {
-      headers: {
-        "Content-Type": "multipart/form-data",
-      },
-    })
-    .then((response) => {
-      console.log(response);
-      return true;
-    })
-    .catch((error) => {
-      console.error("Error uploading files", error);
-      return false;
-    });
+  return uploadedSuccessfully;
 };
 </script>
 
