@@ -1,11 +1,19 @@
 <template>
   <div class="uploader-container">
     <label class="custom-file-upload">
-      Upload Images
+      <div v-if="isUploading">Uploading...</div>
+      <div v-else>Upload Images</div>
+      <div
+        v-if="error"
+        class="error"
+      >
+        {{ error }}
+      </div>
       <input
         type="file"
         multiple
         :accept="acceptedMimeTypes"
+        :disabled="isUploading"
         @change="handleFileUpload"
       />
     </label>
@@ -13,52 +21,18 @@
 </template>
 
 <script setup lang="ts">
-import { acceptedMimeTypes, maximumFileSize } from "@/constants/fileConstants";
-import axios from "axios";
+import { acceptedMimeTypes } from "@/constants/fileConstants";
+import { useImageStore } from "@/stores/imageStore";
+import { storeToRefs } from "pinia";
 
-const emit = defineEmits<{
-  selectedFiles: (files: File[]) => void;
-}>();
+const imageStore = useImageStore();
+const { isLoading: isUploading, error } = storeToRefs(imageStore);
 
 // Handle file selection
 const handleFileUpload = async (event: Event) => {
   const target = event.target as HTMLInputElement;
-  const validFiles = selectValidFiles(target.files);
-  const success = await uploadFiles(validFiles);
-  if (success) {
-    emit("selectedFiles", validFiles);
-  }
-};
-
-const selectValidFiles = (files?: FileList) =>
-  files
-    ? [...files].filter(
-        ({ type, size }) =>
-          acceptedMimeTypes.includes(type) && size < maximumFileSize,
-      )
-    : undefined;
-
-const uploadFiles = async (files: File[]): Promise<boolean> => {
-  let uploadedSuccessfully = true;
-
-  // Upload each file as a separate request to avoid multipart form data size limits
-  files.forEach(async (file) => {
-    const formData = new FormData();
-    formData.append("files", file);
-
-    await axios
-      .post("/api/images", formData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      })
-      .catch((error) => {
-        console.error("Error uploading file", error);
-        uploadedSuccessfully = false;
-      });
-  });
-
-  return uploadedSuccessfully;
+  const validImages = imageStore.filterValidImages(target.files);
+  await imageStore.uploadImages(validImages);
 };
 </script>
 

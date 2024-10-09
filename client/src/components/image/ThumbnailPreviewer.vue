@@ -1,100 +1,30 @@
 <template>
   <div class="thumbnails">
+    <div v-show="isLoading">Loading...</div>
     <div
-      v-for="(file, index) in files"
+      v-for="(image, index) in displayedImages"
       :key="index"
       class="thumbnail"
     >
       <img
-        :src="file.thumbnail_url"
-        :alt="file.name"
+        :src="image.thumbnail_url"
+        :alt="image.name"
       />
     </div>
   </div>
 </template>
-<!--- <template>
-  <div class="thumbnails">
-    <div v-if="isLoading">Loading...</div>
-    <div v-else>
-      <div
-        v-for="(file, index) in files"
-        :key="index"
-        class="thumbnail"
-      >
-        <img
-          :src="file.thumbnail_url"
-          :alt="file.name"
-        />
-      </div>
-    </div>
-    <div
-      v-if="error"
-      class="error"
-    >
-      {{ error }}
-    </div>
-  </div>
-</template> ---->
 
 <script setup lang="ts">
-import { ref, watch, onMounted } from "vue";
-import axios from "axios";
+import { computed, onMounted } from "vue";
+import { useImageStore } from "@/stores/imageStore";
+import { storeToRefs } from "pinia";
 
-interface ImageMetaData {
-  name: string;
-  image_url: string;
-  thumbnail_url: string;
-}
+const imageStore = useImageStore();
+const { images, isLoading } = storeToRefs(imageStore);
 
-// TODO: Change this into something more appropriate
-const props = withDefaults(
-  defineProps<{
-    newFiles: ImageMetaData[];
-    maximumNumberThumbnails?: number;
-  }>(),
-  {
-    maximumNumberThumbnails: 10,
-  },
-);
+const displayedImages = computed(() => images.value);
 
-const files = ref<ImageMetaData[]>([]);
-
-// TODO: Change this into something more appropriate
-watch(
-  // Watch for new files
-  () => props.newFiles,
-  (newFiles) => {
-    newFiles.forEach((file) => {
-      const url = URL.createObjectURL(file);
-      const newImage: ImageMetaData = {
-        image_url: url,
-        thumbnail_url: url,
-        name: file.name,
-      };
-
-      files.value.unshift(newImage);
-      console.warn("Don't forget to remove duplicates");
-
-      if (files.value.length > props.maximumNumberThumbnails) {
-        const removedFile = files.value.pop();
-        URL.revokeObjectURL(removedFile.url);
-      }
-    });
-  },
-);
-
-onMounted(async () => {
-  await axios
-    .get("/api/images")
-    .then((response) =>
-      response.data.images.forEach((image: ImageMetaData) => {
-        files.value.push(image);
-      }),
-    )
-    .catch((error) => {
-      console.error("Error fetching images onMounted", error);
-    });
-});
+onMounted(async () => await imageStore.getImageMetaData());
 </script>
 
 <style scoped>
