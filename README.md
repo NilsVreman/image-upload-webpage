@@ -9,14 +9,12 @@
 5. Logging
 6. Static file serving
 7. Pagination
-8. Background processing of thumbnails (that's the bottleneck right now)
+8. ~~Background processing of thumbnails~~ -- Solved by compiling with a higher optimization level
 9. Video support
 
 ## ToDo - Rust
 
 1. investigate `tracing.rs`
-2. > [!WARNING]
-   > Extremely slow image upload.
-3. Abstractions for storage, etc.
-4. Additional tests.
-5. Unique ID generation
+2. Abstractions for storage, etc.
+3. Additional tests.
+4. Unique ID generation

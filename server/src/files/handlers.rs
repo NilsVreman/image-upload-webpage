@@ -75,7 +75,7 @@ pub async fn post_image_list(
     }
 
     Ok(Json(serde_json::json!(
-        "Files uploaded successfully".to_string()
+        { "msg": "Files uploaded successfully".to_string() }
     )))
 }
 

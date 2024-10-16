@@ -15,9 +15,6 @@ pub enum FileUploadError {
     #[error("Failed to read file data: {0}")]
     ReadFileError(String),
 
-    #[error("Failed to process image: {0}")]
-    ProcessingError(String),
-
     #[error("Failed to write file to disk: {0}")]
     WriteFileError(String),
 }
@@ -32,8 +29,7 @@ impl response::IntoResponse for FileUploadError {
             }
             FileUploadError::StorageError(_)
             | FileUploadError::ReadFileError(_)
-            | FileUploadError::WriteFileError(_)
-            | FileUploadError::ProcessingError(_) => StatusCode::INTERNAL_SERVER_ERROR,
+            | FileUploadError::WriteFileError(_) => StatusCode::INTERNAL_SERVER_ERROR,
         };
 
         (code, Json(serde_json::json!({"error": self.to_string()}))).into_response()
