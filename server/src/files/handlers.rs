@@ -1,4 +1,7 @@
-use super::{errors::FileUploadError, storage};
+use super::{
+    errors::FileUploadError,
+    storage::{self, Sanitize},
+};
 
 use axum::{
     body,
@@ -8,21 +11,6 @@ use axum::{
 use serde::Serialize;
 
 pub const MAX_UPLOAD_SIZE: usize = 50 * 1024 * 1024; // 50 MB
-
-pub trait Sanitize {
-    fn sanitize(&self) -> Option<String>;
-}
-
-impl Sanitize for Option<&str> {
-    fn sanitize(&self) -> Option<String> {
-        self.map(|s| s.replace(&['/', '\\', ':', '*', '?', '"', '<', '>', '|'][..], ""))
-    }
-}
-impl Sanitize for String {
-    fn sanitize(&self) -> Option<String> {
-        Some(&self[..]).sanitize()
-    }
-}
 
 #[derive(Serialize)]
 pub struct ImageMetaData {
@@ -64,14 +52,10 @@ pub async fn post_image_list(
             .await
             .map_err(|err| FileUploadError::WriteFileError(err.to_string()))?;
 
-        let x = sanitized_name.clone();
-
         tokio::spawn(async move {
             storage::write_thumbnail(&sanitized_name, &image_data)
                 .map_err(|err| FileUploadError::WriteFileError(err.to_string()))
         });
-
-        dbg!("Uploaded file: {}", x);
     }
 
     Ok(Json(serde_json::json!(
@@ -103,7 +87,7 @@ pub async fn get_thumbnail(
 
 pub async fn get_all_thumbnail_meta_data() -> Result<Json<ImageList>, FileUploadError> {
     Ok(Json(ImageList {
-        images: storage::get_all_thumbnail_names()
+        images: storage::get_all_image_names()
             .await
             .map_err(|err| FileUploadError::ReadFileError(err.to_string()))?
             .iter()
