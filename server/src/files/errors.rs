@@ -3,8 +3,8 @@ use thiserror::Error;
 
 #[derive(Error, Debug)]
 pub enum FileUploadError {
-    #[error("Failed to create uploads folder: {0}")]
-    CreateFolderError(String),
+    #[error("Failed to setup storage: {0}")]
+    StorageError(String),
 
     #[error("Failed to read multipart field: {0}")]
     MultipartError(String),
@@ -27,7 +27,7 @@ impl response::IntoResponse for FileUploadError {
             FileUploadError::MultipartError(_) | FileUploadError::InvalidContentType(_) => {
                 StatusCode::BAD_REQUEST
             }
-            FileUploadError::CreateFolderError(_)
+            FileUploadError::StorageError(_)
             | FileUploadError::ReadFileError(_)
             | FileUploadError::WriteFileError(_) => StatusCode::INTERNAL_SERVER_ERROR,
         };

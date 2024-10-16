@@ -1,11 +1,19 @@
 <template>
   <div class="uploader-container">
     <label class="custom-file-upload">
-      Upload Images
+      <div v-if="isUploading">Uploading...</div>
+      <div v-else>Upload Images</div>
+      <div
+        v-if="error"
+        class="error"
+      >
+        {{ error }}
+      </div>
       <input
         type="file"
         multiple
         :accept="acceptedMimeTypes"
+        :disabled="isUploading"
         @change="handleFileUpload"
       />
     </label>
@@ -13,51 +21,18 @@
 </template>
 
 <script setup lang="ts">
-import { acceptedMimeTypes, maximumFileSize } from "@/constants/fileConstants";
-import axios from "axios";
+import { acceptedMimeTypes } from "@/constants/fileConstants";
+import { useImageStore } from "@/stores/imageStore";
+import { storeToRefs } from "pinia";
 
-const emit = defineEmits<{
-  selectedFiles: (files: File[]) => void;
-}>();
+const imageStore = useImageStore();
+const { isLoading: isUploading, error } = storeToRefs(imageStore);
 
 // Handle file selection
 const handleFileUpload = async (event: Event) => {
   const target = event.target as HTMLInputElement;
-  const validFiles = selectValidFiles(target.files);
-  const uploadedSuccessfully = await uploadFiles(validFiles);
-  if (uploadedSuccessfully) {
-    emit("selectedFiles", validFiles);
-  }
-};
-
-const selectValidFiles = (files?: FileList) =>
-  files
-    ? [...files].filter(
-        ({ type, size }) =>
-          acceptedMimeTypes.includes(type) && size < maximumFileSize,
-      )
-    : undefined;
-
-const uploadFiles = async (files: File[]): Promise<boolean> => {
-  const formData = new FormData();
-  files.forEach((file) => {
-    formData.append("files", file);
-  });
-  console.log("Uploading files", formData.getAll("files"));
-  return await axios
-    .post("http://localhost:3000/images", formData, {
-      headers: {
-        "Content-Type": "multipart/form-data",
-      },
-    })
-    .then((response) => {
-      console.log(response);
-      return true;
-    })
-    .catch((error) => {
-      console.error("Error uploading files", error);
-      return false;
-    });
+  const validImages = imageStore.filterValidImages(target.files);
+  await imageStore.uploadImages(validImages);
 };
 </script>
 

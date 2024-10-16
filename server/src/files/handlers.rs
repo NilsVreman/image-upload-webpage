@@ -1,10 +1,13 @@
 use super::{errors::FileUploadError, storage};
+
 use axum::{
     body,
     extract::{multipart::Field, Json, Multipart, Path},
     http::StatusCode,
 };
 use serde::Serialize;
+
+pub const MAX_UPLOAD_SIZE: usize = 50 * 1024 * 1024; // 50 MB
 
 pub trait Sanitize {
     fn sanitize(&self) -> Option<String>;
@@ -17,26 +20,28 @@ impl Sanitize for Option<&str> {
 }
 impl Sanitize for String {
     fn sanitize(&self) -> Option<String> {
-        Some(self.replace(&['/', '\\', ':', '*', '?', '"', '<', '>', '|'][..], ""))
+        Some(&self[..]).sanitize()
     }
 }
 
 #[derive(Serialize)]
-pub struct FileUploadResponse {
-    msg: String,
+pub struct ImageMetaData {
+    name: String,
+    image_url: String,
+    thumbnail_url: String,
 }
 
 #[derive(Serialize)]
-pub struct FileList {
-    files: Vec<String>,
+pub struct ImageList {
+    images: Vec<ImageMetaData>,
 }
 
 pub async fn post_image_list(
     mut images: Multipart,
-) -> Result<Json<FileUploadResponse>, FileUploadError> {
-    storage::ensure_uploads_folder_exists()
+) -> Result<Json<serde_json::Value>, FileUploadError> {
+    storage::setup()
         .await
-        .map_err(|err| FileUploadError::CreateFolderError(err.to_string()))?;
+        .map_err(|err| FileUploadError::StorageError(err.to_string()))?;
 
     while let Some(file) = images
         .next_field()
@@ -59,29 +64,55 @@ pub async fn post_image_list(
             .await
             .map_err(|err| FileUploadError::WriteFileError(err.to_string()))?;
 
-        dbg!("File uploaded: {}", &sanitized_name);
+        let x = sanitized_name.clone();
+
+        tokio::spawn(async move {
+            storage::write_thumbnail(&sanitized_name, &image_data)
+                .map_err(|err| FileUploadError::WriteFileError(err.to_string()))
+        });
+
+        dbg!("Uploaded file: {}", x);
     }
 
-    Ok(Json(FileUploadResponse {
-        msg: "Files uploaded successfully".to_string(),
-    }))
+    Ok(Json(serde_json::json!(
+        { "msg": "Files uploaded successfully".to_string() }
+    )))
 }
 
 pub async fn get_image(
-    Path(file_name): Path<String>,
+    Path(name): Path<String>,
 ) -> Result<(StatusCode, body::Bytes), FileUploadError> {
-    let image = storage::read_image(&file_name.sanitize().expect("Invalid file name"))
-        .await
-        .map_err(|err| FileUploadError::ReadFileError(err.to_string()))?;
-
-    Ok((StatusCode::OK, image))
-}
-
-pub async fn get_image_list() -> Result<Json<FileList>, FileUploadError> {
-    Ok(Json(FileList {
-        files: storage::get_all_image_names()
+    Ok((
+        StatusCode::OK,
+        storage::get_image(&name)
             .await
             .map_err(|err| FileUploadError::ReadFileError(err.to_string()))?,
+    ))
+}
+
+pub async fn get_thumbnail(
+    Path(name): Path<String>,
+) -> Result<(StatusCode, body::Bytes), FileUploadError> {
+    Ok((
+        StatusCode::OK,
+        storage::get_thumbnail(&name)
+            .await
+            .map_err(|err| FileUploadError::ReadFileError(err.to_string()))?,
+    ))
+}
+
+pub async fn get_all_thumbnail_meta_data() -> Result<Json<ImageList>, FileUploadError> {
+    Ok(Json(ImageList {
+        images: storage::get_all_thumbnail_names()
+            .await
+            .map_err(|err| FileUploadError::ReadFileError(err.to_string()))?
+            .iter()
+            .map(|name| ImageMetaData {
+                name: name.clone(),
+                image_url: format!("/api/images/{}", name), // NOTE: these have to match routes
+                thumbnail_url: format!("/api/images/{}/thumbnail", name),
+            })
+            .collect(),
     }))
 }
 
