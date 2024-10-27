@@ -27,10 +27,6 @@ pub struct ImageList {
 pub async fn post_image_list(
     mut images: Multipart,
 ) -> Result<Json<serde_json::Value>, FileUploadError> {
-    storage::setup()
-        .await
-        .map_err(|err| FileUploadError::StorageError(err.to_string()))?;
-
     while let Some(file) = images
         .next_field()
         .await
@@ -52,10 +48,10 @@ pub async fn post_image_list(
             .await
             .map_err(|err| FileUploadError::WriteFileError(err.to_string()))?;
 
-        tokio::spawn(async move {
-            storage::write_thumbnail(&sanitized_name, &image_data)
-                .map_err(|err| FileUploadError::WriteFileError(err.to_string()))
-        });
+        tokio::spawn(async move { storage::write_thumbnail(&sanitized_name, &image_data) })
+            .await
+            .unwrap()
+            .map_err(|err| FileUploadError::WriteFileError(err.to_string()))?;
     }
 
     Ok(Json(serde_json::json!(
@@ -81,13 +77,13 @@ pub async fn get_thumbnail(
         StatusCode::OK,
         storage::get_thumbnail(&name)
             .await
-            .map_err(|err| FileUploadError::ReadFileError(err.to_string()))?,
+            .map_err(|err| FileUploadError::ReadFileError(format!("{}: {}", err, name)))?,
     ))
 }
 
-pub async fn get_all_thumbnail_meta_data() -> Result<Json<ImageList>, FileUploadError> {
+pub async fn get_all_thumbnails() -> Result<Json<ImageList>, FileUploadError> {
     Ok(Json(ImageList {
-        images: storage::get_all_image_names()
+        images: storage::get_all_thumbnail_names()
             .await
             .map_err(|err| FileUploadError::ReadFileError(err.to_string()))?
             .iter()

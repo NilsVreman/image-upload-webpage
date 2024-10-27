@@ -3,9 +3,6 @@ use thiserror::Error;
 
 #[derive(Error, Debug)]
 pub enum FileUploadError {
-    #[error("Failed to setup storage: {0}")]
-    StorageError(String),
-
     #[error("Failed to read multipart field: {0}")]
     MultipartError(String),
 
@@ -21,15 +18,13 @@ pub enum FileUploadError {
 
 impl response::IntoResponse for FileUploadError {
     fn into_response(self) -> response::Response {
-        dbg!(&self);
-
         let code = match &self {
             FileUploadError::MultipartError(_) | FileUploadError::InvalidContentType(_) => {
                 StatusCode::BAD_REQUEST
             }
-            FileUploadError::StorageError(_)
-            | FileUploadError::ReadFileError(_)
-            | FileUploadError::WriteFileError(_) => StatusCode::INTERNAL_SERVER_ERROR,
+            FileUploadError::ReadFileError(_) | FileUploadError::WriteFileError(_) => {
+                StatusCode::INTERNAL_SERVER_ERROR
+            }
         };
 
         (code, Json(serde_json::json!({"error": self.to_string()}))).into_response()

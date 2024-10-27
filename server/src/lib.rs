@@ -2,4 +2,4 @@ mod app;
 mod files;
 mod middleware;
 
-pub use app::create_app;
+pub use app::{create_app, setup_app};

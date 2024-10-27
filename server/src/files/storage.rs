@@ -42,6 +42,7 @@ pub trait Sanitize {
 impl Sanitize for Option<&str> {
     fn sanitize(&self) -> Option<FileName> {
         let bad_char = |c| BAD_CHARS.contains(&c) || c.is_control();
+
         // get the first non-empty substring that doesn't contain bad characters
         let file_name = self.and_then(|n| n.split(bad_char).find(|s| !s.is_empty()))?;
         let file_extension = self.and_then(|n| n.rsplit_once('.')).map(|(_, ext)| ext)?;
@@ -66,20 +67,35 @@ pub async fn setup() -> io::Result<()> {
     ensure_folder_exists(&thumbnail_folder).await
 }
 
-pub async fn write_image(file_name: &FileName, image_data: &body::Bytes) -> Result<(), ImageError> {
-    tokio::fs::write(get_file_path(&file_name, ImageType::Image)?, &image_data)
+pub async fn write_image(
+    file_name: &FileName,
+    image_buffer: &body::Bytes,
+) -> Result<(), ImageError> {
+    tokio::fs::write(get_file_path(&file_name, ImageType::Image)?, &image_buffer)
         .await
         .map_err(|err| ImageError::IoError(err))
 }
 
-pub fn write_thumbnail(file_name: &FileName, image_data: &body::Bytes) -> Result<(), ImageError> {
-    image::load_from_memory(&image_data)?
+pub fn write_thumbnail(file_name: &FileName, image_buffer: &body::Bytes) -> Result<(), ImageError> {
+    image::load_from_memory(&image_buffer)?
         .thumbnail(MAX_THUMBNAILS_SIZE, MAX_THUMBNAILS_SIZE)
         .save(get_file_path(&file_name, ImageType::Thumbnail)?)
 }
 
-pub async fn get_all_image_names() -> io::Result<Vec<String>> {
-    let mut entries = tokio::fs::read_dir(get_folder(ImageType::Image)?).await?;
+pub async fn get_all_thumbnail_names() -> io::Result<Vec<String>> {
+    get_all_names(ImageType::Thumbnail).await
+}
+
+pub async fn get_image(name: &String) -> io::Result<body::Bytes> {
+    get_file(name, ImageType::Image).await
+}
+
+pub async fn get_thumbnail(name: &String) -> io::Result<body::Bytes> {
+    get_file(name, ImageType::Thumbnail).await
+}
+
+async fn get_all_names(image_type: ImageType) -> io::Result<Vec<String>> {
+    let mut entries = tokio::fs::read_dir(get_folder(image_type)?).await?;
     let mut image_names: Vec<String> = Vec::new();
     while let Some(entry) = entries.next_entry().await? {
         image_names.push(entry.file_name().to_string_lossy().to_string());
@@ -87,15 +103,7 @@ pub async fn get_all_image_names() -> io::Result<Vec<String>> {
     Ok(image_names)
 }
 
-pub async fn get_image(name: &String) -> io::Result<body::Bytes> {
-    get_image_type(name, ImageType::Image).await
-}
-
-pub async fn get_thumbnail(name: &String) -> io::Result<body::Bytes> {
-    get_image_type(name, ImageType::Thumbnail).await
-}
-
-async fn get_image_type(name: &String, image_type: ImageType) -> io::Result<body::Bytes> {
+async fn get_file(name: &String, image_type: ImageType) -> io::Result<body::Bytes> {
     tokio::fs::read(get_folder(image_type)?.join(name))
         .await
         .map(|bytes| body::Bytes::from(bytes))

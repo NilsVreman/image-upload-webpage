@@ -1,19 +1,11 @@
 <template>
   <div class="uploader-container">
     <label class="custom-file-upload">
-      <div v-if="isUploading">Uploading...</div>
-      <div v-else>Upload Images</div>
-      <div
-        v-if="error"
-        class="error"
-      >
-        {{ error }}
-      </div>
+      <div>Upload Images</div>
       <input
         type="file"
         multiple
         :accept="acceptedMimeTypes"
-        :disabled="isUploading"
         @change="handleFileUpload"
       />
     </label>
@@ -23,10 +15,8 @@
 <script setup lang="ts">
 import { acceptedMimeTypes } from "@/constants/fileConstants";
 import { useImageStore } from "@/stores/imageStore";
-import { storeToRefs } from "pinia";
 
 const imageStore = useImageStore();
-const { isLoading: isUploading, error } = storeToRefs(imageStore);
 
 // Handle file selection
 const handleFileUpload = async (event: Event) => {
