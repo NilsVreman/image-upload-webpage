@@ -10,7 +10,7 @@
 6. Static file serving
 7. Pagination
 8. ~~Background processing of thumbnails~~ -- Solved by compiling with a higher optimization level
-9. Don't retrieve all thumbnails on upload (filter)
+9. ~~Don't retrieve all thumbnails on upload (filter)~~
 10. Video support
 11. Improved error handling in client
 12. Sanitize **ALL** inputs
