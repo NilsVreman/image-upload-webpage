@@ -1,7 +1,7 @@
 <template>
   <div class="container">
     <ImageUploader />
-    <ThumbnailPreviewer />
+    <ThumbnailPreviewer :max-thumbnails="50" />
   </div>
 </template>
 
@@ -14,7 +14,9 @@ import ThumbnailPreviewer from "./ThumbnailPreviewer.vue";
 .container {
   display: flex;
   flex-direction: column;
-  align-items: center;
+  align-items: stretch;
+  width: 80vw;
+  max-width: 100%;
   gap: 10px;
   padding: 20px;
 }

@@ -20,8 +20,10 @@ export const useImageStore = defineStore("imageStore", () => {
         console.error("Error fetching images:", err);
       });
 
-    const existingImages = new Set(images.value);
-    const newImages = imageData.filter((image) => !existingImages.has(image));
+    const existingImageNames = new Set(images.value.map((image) => image.name));
+    const newImages = imageData.filter(
+      (image) => !existingImageNames.has(image.name),
+    );
     images.value.unshift(...newImages);
   };
 

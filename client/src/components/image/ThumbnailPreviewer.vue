@@ -14,14 +14,23 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted } from "vue";
+import { computed, onMounted, defineProps } from "vue";
 import { useImageStore } from "@/stores/imageStore";
 import { storeToRefs } from "pinia";
+
+const props = defineProps<{
+  maxThumbnails: {
+    type: number;
+    default: 100;
+  };
+}>();
 
 const imageStore = useImageStore();
 const { images } = storeToRefs(imageStore);
 
-const displayedImages = computed(() => images.value);
+const displayedImages = computed(() =>
+  images.value.slice(0, props.maxThumbnails),
+);
 
 onMounted(async () => await imageStore.updateImageMetaData());
 </script>
@@ -29,24 +38,26 @@ onMounted(async () => await imageStore.updateImageMetaData());
 <style scoped>
 .thumbnails {
   display: grid;
-  grid-template: auto / repeat(5, minmax(100px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
   gap: 10px;
   margin-top: 10px;
 }
 
 .thumbnail {
-  max-width: 100px;
-  max-height: 100px;
+  position: relative;
+  width: 100%;
+  padding-top: 100%;
+  overflow: hidden;
   border: 1px solid #ccc;
-  padding: 5px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  box-sizing: border-box; /* Ensure padding and border are included in width and height */
+  box-sizing: border-box;
 }
 
 .thumbnail img {
-  max-width: 100%;
-  max-height: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 </style>
