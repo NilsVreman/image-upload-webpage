@@ -1,7 +1,7 @@
 <template>
   <div class="container">
     <ImageUploader />
-    <ThumbnailPreviewer />
+    <ThumbnailPreviewer :max-thumbnails="50" />
   </div>
 </template>
 

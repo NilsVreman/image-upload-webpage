@@ -14,14 +14,23 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted } from "vue";
+import { computed, onMounted, defineProps } from "vue";
 import { useImageStore } from "@/stores/imageStore";
 import { storeToRefs } from "pinia";
+
+const props = defineProps<{
+  maxThumbnails: {
+    type: number;
+    default: 100;
+  };
+}>();
 
 const imageStore = useImageStore();
 const { images } = storeToRefs(imageStore);
 
-const displayedImages = computed(() => images.value);
+const displayedImages = computed(() =>
+  images.value.slice(0, props.maxThumbnails),
+);
 
 onMounted(async () => await imageStore.updateImageMetaData());
 </script>
