@@ -11,31 +11,22 @@ export interface ImageMetaData {
 
 export const useImageStore = defineStore("imageStore", () => {
   const images = ref<ImageMetaData[]>([]);
-  const isLoading = ref(false);
-  const error = ref<string | null>(null);
 
-  const getImageMetaData = async () => {
-    isLoading.value = true;
-    error.value = null;
-
-    await axios
-      .get("/api/images")
-      .then((response) => {
-        images.value = response.data.images;
-      })
+  const updateImageMetaData = async () => {
+    const imageData = await axios
+      .get("/api/images/thumbnails")
+      .then((response) => response.data.images)
       .catch((err) => {
-        error.value = err instanceof Error ? err.message : "An error occurred";
         console.error("Error fetching images:", err);
-      })
-      .finally(() => {
-        isLoading.value = false;
       });
+
+    const existingImages = new Set(images.value);
+    const newImages = imageData.filter((image) => !existingImages.has(image));
+    images.value.unshift(...newImages);
   };
 
   const uploadImages = async (files: File[]) => {
-    isLoading.value = true;
-    error.value = null;
-
+    console.log("Uploading images");
     files.forEach(async (file) => {
       const formData = new FormData();
       formData.append("files", file);
@@ -46,33 +37,28 @@ export const useImageStore = defineStore("imageStore", () => {
             "Content-Type": "multipart/form-data",
           },
         })
-        .catch((error) => {
-          error.value =
-            err instanceof Error ? err.message : "An error occurred";
-          uploadedSuccessfully = false;
+        .catch((err) => {
           console.error("Error fetching images:", err);
         });
     });
 
-    await getImageMetaData();
-    isLoading.value = false;
+    console.log("Images uploaded successfully");
+    await updateImageMetaData();
+    console.log("Successfully updated image metadata");
   };
 
   // Function to select valid files based on MIME type and size
-  const filterValidImages = (files?: FileList): File[] => {
-    return files
+  const filterValidImages = (files?: FileList): File[] =>
+    files
       ? [...files].filter(
           ({ type, size }) =>
             acceptedMimeTypes.includes(type) && size <= maximumFileSize,
         )
       : [];
-  };
 
   return {
     images,
-    isLoading,
-    error,
-    getImageMetaData,
+    updateImageMetaData,
     uploadImages,
     filterValidImages,
   };

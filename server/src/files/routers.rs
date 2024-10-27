@@ -11,7 +11,7 @@ pub fn create_image_router() -> Router {
             "/",
             post(handlers::post_image_list).layer(DefaultBodyLimit::max(handlers::MAX_UPLOAD_SIZE)),
         )
-        .route("/", get(handlers::get_all_thumbnail_meta_data))
+        .route("/thumbnails", get(handlers::get_all_thumbnails))
         .route("/:image_name", get(handlers::get_image))
         .route("/:image_name/thumbnail", get(handlers::get_thumbnail))
 }

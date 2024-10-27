@@ -3,6 +3,7 @@ use server;
 #[tokio::main]
 async fn main() {
     // Build our application
+    server::setup_app().await.unwrap();
     let app = server::create_app();
 
     // Run our app

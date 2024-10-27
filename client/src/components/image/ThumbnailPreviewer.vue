@@ -1,6 +1,5 @@
 <template>
   <div class="thumbnails">
-    <div v-show="isLoading">Loading...</div>
     <div
       v-for="(image, index) in displayedImages"
       :key="index"
@@ -20,11 +19,11 @@ import { useImageStore } from "@/stores/imageStore";
 import { storeToRefs } from "pinia";
 
 const imageStore = useImageStore();
-const { images, isLoading } = storeToRefs(imageStore);
+const { images } = storeToRefs(imageStore);
 
 const displayedImages = computed(() => images.value);
 
-onMounted(async () => await imageStore.getImageMetaData());
+onMounted(async () => await imageStore.updateImageMetaData());
 </script>
 
 <style scoped>
