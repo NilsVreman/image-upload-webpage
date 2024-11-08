@@ -14,6 +14,7 @@
 10. Video support
 11. Improved error handling in client
 12. Sanitize **ALL** inputs
+13. Should probably refactor Server module-structure
 
 ## ToDo - Rust
 
