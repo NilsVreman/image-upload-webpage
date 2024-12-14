@@ -37,3 +37,46 @@ async fn run_server() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
 
     Ok(())
 }
+
+// FIXME: This is a work in progress
+//
+//#[derive(Debug, Clone)]
+//struct TlsData {
+//    _hostname: Option<Arc<str>>,
+//}
+//
+//#[derive(Debug, Clone)]
+//struct CustomAcceptor {
+//    inner: RustlsAcceptor,
+//}
+//
+//impl CustomAcceptor {
+//    fn new(inner: RustlsAcceptor) -> Self {
+//        Self { inner }
+//    }
+//}
+//
+//impl<I, S> Accept<I, S> for CustomAcceptor
+//where
+//    I: AsyncRead + AsyncWrite + Unpin + Send + 'static,
+//    S: Send + 'static,
+//{
+//    type Stream = TlsStream<I>;
+//    type Service = AddExtension<S, TlsData>;
+//    type Future = BoxFuture<'static, io::Result<(Self::Stream, Self::Service)>>;
+//
+//    fn accept(&self, stream: I, service: S) -> Self::Future {
+//        let acceptor = self.inner.clone();
+//
+//        Box::pin(async move {
+//            let (stream, service) = acceptor.accept(stream, service).await?;
+//            let server_conn = stream.get_ref().1;
+//            let sni_hostname = TlsData {
+//                _hostname: server_conn.server_name().map(From::from),
+//            };
+//            let service = Extension(sni_hostname).layer(service);
+//
+//            Ok((stream, service))
+//        })
+//    }
+//}
