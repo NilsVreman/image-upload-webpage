@@ -1,7 +1,4 @@
-use std::env;
-
 use chrono::{Duration, Utc};
-use dotenv::dotenv;
 use jsonwebtoken as jwt;
 use jsonwebtoken::errors::Error as JwtError;
 use serde::{Deserialize, Serialize};
@@ -12,16 +9,14 @@ pub struct Claims {
     exp: usize,  // expiration time (unix timestamp)
 }
 
+#[derive(Clone)]
 pub struct JwtConfig {
-    hash: String,
     secret: String,
 }
 
-pub fn setup() -> JwtConfig {
-    dotenv().ok();
-    JwtConfig {
-        hash: env::var("SHARED_SECRET_HASH").expect("SHARED_SECRET_HASH must be set"),
-        secret: env::var("JWT_SECRET").expect("JWT_SECRET must be set"),
+impl JwtConfig {
+    pub fn new(secret: String) -> Self {
+        Self { secret }
     }
 }
 
@@ -43,12 +38,11 @@ pub fn create_jwt(subject: &str, jwt_config: &JwtConfig, exp_min: i64) -> Result
     )
 }
 
-pub fn verify_jwt(token: &str, jwt_config: &JwtConfig) -> Result<Claims, JwtError> {
-    let validation = jwt::Validation::default();
+pub fn validate_jwt(token: &str, jwt_config: &JwtConfig) -> Result<Claims, JwtError> {
     let token_data = jwt::decode::<Claims>(
         token,
         &jwt::DecodingKey::from_secret(jwt_config.secret.as_bytes()),
-        &validation,
+        &jwt::Validation::default(),
     )?;
 
     Ok(token_data.claims)
