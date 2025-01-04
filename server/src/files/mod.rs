@@ -1,4 +1,7 @@
 mod errors;
-pub mod handlers;
-pub mod routers;
-pub mod storage;
+mod handlers;
+mod routers;
+mod storage;
+
+pub use routers::create_image_router;
+pub use storage::setup;

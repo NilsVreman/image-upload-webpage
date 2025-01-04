@@ -1,12 +1,27 @@
 use server;
+use std::net::{Ipv4Addr, SocketAddr};
+use tokio::net::TcpListener;
+
+fn main() {
+    if let Err(err) = run_server() {
+        eprintln!("Error running server: {}", err);
+        std::process::exit(1);
+    }
+}
 
 #[tokio::main]
-async fn main() {
+async fn run_server() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
+    println!("Setting up server...");
+
     // Build our application
-    server::setup_app().await.unwrap();
-    let app = server::create_app();
+    let app = server::create_app().await?;
+    let port = 3000;
+    let addr = SocketAddr::new(Ipv4Addr::LOCALHOST.into(), port);
 
     // Run our app
-    let listener = tokio::net::TcpListener::bind("0.0.0.0:3000").await.unwrap();
+    println!("Starting to serve on https://{}...", addr);
+    let listener = TcpListener::bind(addr).await?;
     axum::serve(listener, app).await.unwrap();
+
+    Ok(())
 }
