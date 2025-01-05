@@ -1,4 +1,5 @@
 use axum::{http::StatusCode, Extension, Json};
+use axum::{routing::post, Router};
 use bcrypt::verify;
 use serde::Deserialize;
 
@@ -23,7 +24,11 @@ pub struct LoginRequest {
     password: String,
 }
 
-pub async fn login_handler(
+pub fn create_authorisation_router() -> Router {
+    Router::new().route("/login", post(login_handler))
+}
+
+async fn login_handler(
     Extension(config): Extension<AuthConfig>,
     Json(login_req): Json<LoginRequest>,
 ) -> Result<Json<serde_json::Value>, StatusCode> {

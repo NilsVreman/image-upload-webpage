@@ -1,6 +1,7 @@
 use super::auth;
 use super::files;
 use super::middleware;
+use axum::middleware::from_fn_with_state;
 use axum::Extension;
 use axum::{routing::get, Json, Router};
 
@@ -8,15 +9,21 @@ pub async fn create_app() -> Result<Router, String> {
     files::setup().await.map_err(|err| err.to_string())?;
     let auth_config = auth::setup();
 
-    let app_router = Router::new()
-        .route("/health", get(health_handler))
-        .nest("/images", files::create_image_router())
-        .layer(middleware::cors_layer());
-    let login_router = Router::new()
-        .nest("/login", auth::create_authorisation_router())
-        .layer(Extension(auth_config));
+    let public_routes = Router::new().route("/health", get(health_handler));
+    let authenticated_routes =
+        Router::new()
+            .nest("/", files::create_image_router())
+            .layer(from_fn_with_state(
+                auth_config.clone(),
+                middleware::auth_middleware,
+            ));
+    let authorisation_routes =
+        auth::create_authorisation_router().layer(Extension(auth_config.clone()));
 
-    Ok(login_router.nest("/api", app_router))
+    Ok(authorisation_routes
+        .nest("/", public_routes)
+        .nest("/", authenticated_routes)
+        .layer(middleware::cors_middleware()))
 }
 
 async fn health_handler() -> Json<serde_json::Value> {

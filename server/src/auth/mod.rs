@@ -1,9 +1,8 @@
 mod jwt;
 mod login;
-mod routers;
 
 pub use jwt::validate_jwt;
-pub use routers::create_authorisation_router;
+pub use login::create_authorisation_router;
 
 use dotenv::dotenv;
 use std::env;
