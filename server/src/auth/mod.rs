@@ -2,7 +2,7 @@ mod jwt;
 mod login;
 mod routers;
 
-pub use jwt::{create_jwt, validate_jwt};
+pub use jwt::validate_jwt;
 pub use routers::create_authorisation_router;
 
 use dotenv::dotenv;
