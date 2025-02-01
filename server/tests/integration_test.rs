@@ -16,7 +16,7 @@ async fn test_health_check() {
     let response = app
         .oneshot(
             hyper::Request::builder()
-                .uri("/api/health")
+                .uri("/health")
                 .body(axum::body::Body::empty())
                 .unwrap(),
         )

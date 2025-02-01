@@ -89,8 +89,8 @@ pub async fn get_all_thumbnails() -> Result<Json<ImageList>, FileUploadError> {
             .iter()
             .map(|name| ImageMetaData {
                 name: name.clone(),
-                image_url: format!("/api/images/{}", name), // NOTE: these have to match routes
-                thumbnail_url: format!("/api/images/{}/thumbnail", name),
+                image_url: format!("/images/{}", name), // NOTE: these have to match routes
+                thumbnail_url: format!("/images/{}/thumbnail", name),
             })
             .collect(),
     }))
