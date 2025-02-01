@@ -1,7 +1,5 @@
-<script setup lang="ts">
-import ImagePage from "./components/image/ImagePage.vue";
-</script>
+<script setup lang="ts"></script>
 
 <template>
-  <ImagePage />
+  <router-view />
 </template>
