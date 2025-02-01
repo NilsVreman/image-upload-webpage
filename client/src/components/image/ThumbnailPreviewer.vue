@@ -18,12 +18,12 @@ import { computed, onMounted } from "vue";
 import { useImageStore } from "@/stores/imageStore";
 import { storeToRefs } from "pinia";
 
-const props = defineProps<{
+const props = defineProps({
   maxThumbnails: {
-    type: number;
-    default: 100;
-  };
-}>();
+    type: Number,
+    default: 100,
+  },
+});
 
 const imageStore = useImageStore();
 const { images } = storeToRefs(imageStore);
