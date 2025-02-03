@@ -1,5 +1,4 @@
 use axum::{
-    body::Body,
     extract::{Request, State},
     http::{HeaderValue, StatusCode},
     middleware::Next,
@@ -41,25 +40,29 @@ pub async fn auth_middleware(
     req: Request,
     next: Next,
 ) -> Response {
-    let token = match extract_jwt(&req) {
-        Some(t) => t,
-        None => return AuthError::MissingToken.into_response().into(),
+    let token = match extract_cookie_token(&req) {
+        Ok(token) => token,
+        Err(e) => return e.into_response().into(),
     };
 
-    // Validate the JWT token
+    // Validate the JWT token and run request if valid
     match auth::validate_jwt(token, &auth_config.jwt_cfg) {
         Ok(_claims) => next.run(req).await,
         _ => AuthError::InvalidToken.into_response().into(),
     }
 }
 
-fn extract_jwt(req: &Request<Body>) -> Option<&str> {
-    match req
+fn extract_cookie_token(req: &Request) -> Result<&str, AuthError> {
+    if let Some(cookie) = req
         .headers()
-        .get(header::AUTHORIZATION)
-        .and_then(|header| header.to_str().ok())
+        .get(header::COOKIE)
+        .and_then(|v| v.to_str().ok())
     {
-        Some(bearer) if bearer.starts_with("Bearer ") => bearer.strip_prefix("Bearer "),
-        _ => None,
+        return cookie
+            .split(';')
+            .find(|&c| c.trim().starts_with("token="))
+            .map(|c| c.trim_start_matches("token="))
+            .ok_or_else(|| AuthError::MissingToken);
     }
+    Err(AuthError::MissingToken)
 }

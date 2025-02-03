@@ -12,17 +12,18 @@ pub struct Claims {
 #[derive(Clone)]
 pub struct JwtConfig {
     secret: String,
+    expiration: i64,
 }
 
 impl JwtConfig {
-    pub fn new(secret: String) -> Self {
-        Self { secret }
+    pub fn new(secret: String, expiration: i64) -> Self {
+        Self { secret, expiration }
     }
 }
 
-pub fn create_jwt(subject: &str, jwt_config: &JwtConfig, exp_min: i64) -> Result<String, JwtError> {
+pub fn create_jwt(subject: &str, jwt_config: &JwtConfig) -> Result<String, JwtError> {
     let expiration = Utc::now()
-        .checked_add_signed(Duration::minutes(exp_min))
+        .checked_add_signed(Duration::minutes(jwt_config.expiration))
         .expect("valid timestamp")
         .timestamp() as usize;
 
