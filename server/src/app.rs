@@ -12,7 +12,7 @@ pub async fn create_app() -> Result<Router, String> {
     let public_routes = Router::new().route("/health", get(health_handler));
     let authenticated_routes =
         Router::new()
-            .nest("/", files::create_image_router())
+            .merge(files::create_image_router())
             .layer(from_fn_with_state(
                 auth_config.clone(),
                 middleware::auth_middleware,
@@ -21,8 +21,8 @@ pub async fn create_app() -> Result<Router, String> {
         auth::create_authorisation_router().layer(Extension(auth_config.clone()));
 
     Ok(authorisation_routes
-        .nest("/", public_routes)
-        .nest("/", authenticated_routes)
+        .merge(public_routes)
+        .merge(authenticated_routes)
         .layer(middleware::cors_middleware()))
 }
 

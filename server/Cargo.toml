@@ -4,20 +4,21 @@ version = "0.3.0"
 edition = "2021"
 
 [dependencies]
-axum = { version = "0.7.9", features = ["multipart"] }
-tokio = { version = "1.43.0", features = ["full"] }
-uuid = { version = "1.12.1", features = ["v4"] }
-serde = { version = "1.0.217", features = ["derive"] }
-hyper = {version = "1.6.0", features = ["full"] }
-tower-http = { version = "0.6.2", features = ["cors"] }
-image = "0.25.5"
-tower = "0.5.2"
-thiserror = "2.0.11"
-serde_json = "1.0.138"
-dotenv = "0.15.0"
-chrono = "0.4.39"
-jsonwebtoken = "9.3.0"
+axum = { version = "0.8.1", features = ["multipart"] }
+axum-extra = { version = "0.10.0", features = ["cookie"] }
 bcrypt = "0.16.0"
+chrono = "0.4.40"
+dotenv = "0.15.0"
+hyper = {version = "1.6.0", features = ["full"] }
+image = "0.25.5"
+jsonwebtoken = "9.3.1"
+serde = { version = "1.0.218", features = ["derive"] }
+serde_json = "1.0.139"
+thiserror = "2.0.11"
+tokio = { version = "1.43.0", features = ["full"] }
+tower = "0.5.2"
+tower-http = { version = "0.6.2", features = ["cors"] }
+uuid = { version = "1.15.1", features = ["v4"] }
 
 [profile.dev]
 opt-level = 0
