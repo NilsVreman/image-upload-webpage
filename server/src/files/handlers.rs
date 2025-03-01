@@ -1,3 +1,5 @@
+use crate::app;
+
 use super::{
     errors::FileUploadError,
     storage::{self, Sanitize},
@@ -81,7 +83,9 @@ pub async fn get_thumbnail(
     ))
 }
 
-pub async fn get_all_thumbnails() -> Result<Json<ImageList>, FileUploadError> {
+pub async fn get_all_thumbnails(
+    Extension(general_config): Extension<app::GeneralConfig>,
+) -> Result<Json<ImageList>, FileUploadError> {
     Ok(Json(ImageList {
         images: storage::get_all_thumbnail_names()
             .await
@@ -89,8 +93,14 @@ pub async fn get_all_thumbnails() -> Result<Json<ImageList>, FileUploadError> {
             .iter()
             .map(|name| ImageMetaData {
                 name: name.clone(),
-                image_url: format!("/images/{}", name), // NOTE: these have to match routes
-                thumbnail_url: format!("/images/{}/thumbnail", name),
+                image_url: format!(
+                    "{}:{}/images/{}",
+                    general_config.host, general_config.port, name
+                ),
+                thumbnail_url: format!(
+                    "{}:{}/images/{}/thumbnail",
+                    general_config.host, general_config.port, name
+                ),
             })
             .collect(),
     }))

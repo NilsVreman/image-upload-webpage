@@ -1,3 +1,6 @@
+use dotenv::dotenv;
+use std::env;
+
 use chrono::{Duration, Utc};
 use jsonwebtoken as jwt;
 use jsonwebtoken::errors::Error as JwtError;
@@ -16,8 +19,15 @@ pub struct JwtConfig {
 }
 
 impl JwtConfig {
-    pub fn new(secret: String, expiration: i64) -> Self {
-        Self { secret, expiration }
+    pub fn from_env() -> Self {
+        dotenv().ok();
+
+        Self {
+            secret: env::var("JWT_SECRET").expect("JWT_SECRET must be set"),
+            expiration: env::var("JWT_EXPIRATION_TIME")
+                .and_then(|var| var.parse::<i64>().map_err(|_| env::VarError::NotPresent))
+                .expect("JWT_EXPIRATION_TIME must be set"),
+        }
     }
 }
 

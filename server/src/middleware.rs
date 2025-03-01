@@ -7,11 +7,11 @@ use axum::{
 use hyper::{header, Method};
 use tower_http::cors::CorsLayer;
 
-use super::auth;
+use super::{app, auth};
 
-pub fn cors_middleware() -> CorsLayer {
+pub fn cors_middleware(general_config: app::GeneralConfig) -> CorsLayer {
     CorsLayer::new()
-        .allow_origin("http://localhost:5173".parse::<HeaderValue>().unwrap())
+        .allow_origin(general_config.client_url.parse::<HeaderValue>().unwrap())
         .allow_methods(vec![Method::GET, Method::POST])
         .allow_headers(vec![
             header::ACCEPT,
@@ -36,7 +36,8 @@ impl IntoResponse for AuthError {
 }
 
 pub async fn auth_middleware(
-    State(auth_config): State<auth::AuthConfig>,
+    State(jwt_config): State<auth::JwtConfig>,
+    jar: CookieJar,
     req: Request,
     next: Next,
 ) -> Response {
@@ -46,7 +47,7 @@ pub async fn auth_middleware(
     };
 
     // Validate the JWT token and run request if valid
-    match auth::validate_jwt(token, &auth_config.jwt_cfg) {
+    match auth::validate_jwt(token, &jwt_config) {
         Ok(_claims) => next.run(req).await,
         _ => AuthError::InvalidToken.into_response().into(),
     }
