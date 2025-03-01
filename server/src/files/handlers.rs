@@ -8,8 +8,10 @@ use super::{
 use axum::{
     body,
     extract::{multipart::Field, Json, Multipart, Path},
-    http::StatusCode,
+    response::{IntoResponse, Response},
+    Extension,
 };
+use hyper::StatusCode;
 use serde::Serialize;
 
 pub const MAX_UPLOAD_SIZE: usize = 50 * 1024 * 1024; // 50 MB
@@ -24,6 +26,17 @@ pub struct ImageMetaData {
 #[derive(Serialize)]
 pub struct ImageList {
     images: Vec<ImageMetaData>,
+}
+
+pub struct ImageResponse {
+    status: StatusCode,
+    bytes: body::Bytes,
+}
+
+impl IntoResponse for ImageResponse {
+    fn into_response(self) -> Response {
+        (self.status, self.bytes).into_response()
+    }
 }
 
 pub async fn post_image_list(
@@ -61,26 +74,22 @@ pub async fn post_image_list(
     )))
 }
 
-pub async fn get_image(
-    Path(name): Path<String>,
-) -> Result<(StatusCode, body::Bytes), FileUploadError> {
-    Ok((
-        StatusCode::OK,
-        storage::get_image(&name)
+pub async fn get_image(Path(name): Path<String>) -> Result<ImageResponse, FileUploadError> {
+    Ok(ImageResponse {
+        status: StatusCode::OK,
+        bytes: storage::get_image(&name)
             .await
             .map_err(|err| FileUploadError::ReadFileError(err.to_string()))?,
-    ))
+    })
 }
 
-pub async fn get_thumbnail(
-    Path(name): Path<String>,
-) -> Result<(StatusCode, body::Bytes), FileUploadError> {
-    Ok((
-        StatusCode::OK,
-        storage::get_thumbnail(&name)
+pub async fn get_thumbnail(Path(name): Path<String>) -> Result<ImageResponse, FileUploadError> {
+    Ok(ImageResponse {
+        status: StatusCode::OK,
+        bytes: storage::get_thumbnail(&name)
             .await
-            .map_err(|err| FileUploadError::ReadFileError(format!("{}: {}", err, name)))?,
-    ))
+            .map_err(|err| FileUploadError::ReadFileError(err.to_string()))?,
+    })
 }
 
 pub async fn get_all_thumbnails(

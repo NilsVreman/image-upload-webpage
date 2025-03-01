@@ -2,6 +2,7 @@ use std::env;
 
 use axum::body::Body;
 use axum::response::{IntoResponse, Response};
+use axum::routing::get;
 use axum::{http::StatusCode, Extension, Json};
 use axum::{routing::post, Router};
 use axum_extra::extract::cookie::Cookie;

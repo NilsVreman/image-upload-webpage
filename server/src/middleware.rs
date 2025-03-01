@@ -4,6 +4,7 @@ use axum::{
     middleware::Next,
     response::{IntoResponse, Response},
 };
+use axum_extra::extract::CookieJar;
 use hyper::{header, Method};
 use tower_http::cors::CorsLayer;
 
@@ -41,9 +42,9 @@ pub async fn auth_middleware(
     req: Request,
     next: Next,
 ) -> Response {
-    let token = match extract_cookie_token(&req) {
-        Ok(token) => token,
-        Err(e) => return e.into_response().into(),
+    let token = match jar.get("token") {
+        Some(cookie) => cookie.value(),
+        None => return AuthError::MissingToken.into_response(),
     };
 
     // Validate the JWT token and run request if valid
@@ -51,19 +52,4 @@ pub async fn auth_middleware(
         Ok(_claims) => next.run(req).await,
         _ => AuthError::InvalidToken.into_response().into(),
     }
-}
-
-fn extract_cookie_token(req: &Request) -> Result<&str, AuthError> {
-    if let Some(cookie) = req
-        .headers()
-        .get(header::COOKIE)
-        .and_then(|v| v.to_str().ok())
-    {
-        return cookie
-            .split(';')
-            .find(|&c| c.trim().starts_with("token="))
-            .map(|c| c.trim_start_matches("token="))
-            .ok_or_else(|| AuthError::MissingToken);
-    }
-    Err(AuthError::MissingToken)
 }
