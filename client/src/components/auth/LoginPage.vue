@@ -44,33 +44,36 @@ const username = ref("");
 const password = ref("");
 const errorMessage = ref("");
 
-const handleLogin = () => {
+const checkSession = () =>
+  api
+    .get("/check-session")
+    .then(response => {
+      if (response.data.valid) {
+        router.push("/");
+      }
+    })
+    .catch(err => {
+      console.log("Session check error:", err);
+    });
+
+const handleLogin = () =>
   api
     .post("/login", {
       username: username.value,
       password: password.value,
     })
-    .then((response) => {
-      console.log("response data", response);
-      const { token } = response.data;
-
-      // Cache the token in localStorage
-      localStorage.setItem("token", token);
-
-      // Add token to all subsequent api requests
-      api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
-
-      // Redirect to main/home page (or whichever route is appropriate)
-      router.push("/");
+    .then(response => {
+      // server sets the HTTPOnly cookie with the jwt token
+      // recheck the session to verify cookie validity
+      checkSession();
     })
-    .catch((error) => {
+    .catch(error => {
       if (error.response && error.response.status === 401) {
         errorMessage.value = "Username or password is incorrect.";
       } else {
         errorMessage.value = "Login failed. Please try again.";
       }
     });
-};
 </script>
 
 <style scoped>
