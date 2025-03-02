@@ -50,6 +50,6 @@ pub async fn auth_middleware(
     // Validate the JWT token and run request if valid
     match auth::validate_jwt(token, &jwt_config) {
         Ok(_claims) => next.run(req).await,
-        _ => AuthError::InvalidToken.into_response().into(),
+        _ => AuthError::InvalidToken.into_response(),
     }
 }
