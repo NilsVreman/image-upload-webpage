@@ -27,7 +27,7 @@ const handleFileUpload = async (event: Event) => {
 </script>
 
 <style lang="scss" scoped>
-@import "@/assets/styles/theme";
+@use "@/assets/styles/theme.scss" as theme;
 
 .uploader-container {
   display: flex;
@@ -40,8 +40,8 @@ const handleFileUpload = async (event: Event) => {
   display: inline-block;
   padding: 12px 24px;
   cursor: pointer;
-  background-color: $color-button-primary; /* Darker green shade */
-  color: $color-text-primary;
+  background-color: theme.$color-button-primary; /* Darker green shade */
+  color: theme.$color-text-primary;
   border-radius: 4px;
   position: relative;
   font-size: 16px;

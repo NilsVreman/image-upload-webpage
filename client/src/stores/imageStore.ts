@@ -1,6 +1,6 @@
 import { defineStore } from "pinia";
 import { ref } from "vue";
-import axios from "axios";
+import api from "@/services/api";
 import { acceptedMimeTypes, maximumFileSize } from "@/constants/fileConstants";
 
 export interface ImageMetaData {
@@ -13,8 +13,8 @@ export const useImageStore = defineStore("imageStore", () => {
   const images = ref<ImageMetaData[]>([]);
 
   const updateImageMetaData = async () => {
-    const imageData = await axios
-      .get("/api/images/thumbnails")
+    const imageData = await api
+      .get("/images/thumbnails")
       .then((response) => response.data.images)
       .catch((err) => {
         console.error("Error fetching images:", err);
@@ -28,13 +28,12 @@ export const useImageStore = defineStore("imageStore", () => {
   };
 
   const uploadImages = async (files: File[]) => {
-    console.log("Uploading images");
     files.forEach(async (file) => {
       const formData = new FormData();
       formData.append("files", file);
 
-      await axios
-        .post("/api/images", formData, {
+      await api
+        .post("/images", formData, {
           headers: {
             "Content-Type": "multipart/form-data",
           },
@@ -44,9 +43,7 @@ export const useImageStore = defineStore("imageStore", () => {
         });
     });
 
-    console.log("Images uploaded successfully");
     await updateImageMetaData();
-    console.log("Successfully updated image metadata");
   };
 
   // Function to select valid files based on MIME type and size
