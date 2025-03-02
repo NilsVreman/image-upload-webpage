@@ -1,5 +1,6 @@
 mod app;
 mod auth;
+mod config;
 mod files;
 mod middleware;
 

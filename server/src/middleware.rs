@@ -8,9 +8,9 @@ use axum_extra::extract::CookieJar;
 use hyper::{header, Method};
 use tower_http::cors::CorsLayer;
 
-use super::{app, auth};
+use super::{auth, config};
 
-pub fn cors_middleware(general_config: app::GeneralConfig) -> CorsLayer {
+pub fn cors_middleware(general_config: config::GeneralConfig) -> CorsLayer {
     CorsLayer::new()
         .allow_origin(general_config.client_url.parse::<HeaderValue>().unwrap())
         .allow_methods(vec![Method::GET, Method::POST])

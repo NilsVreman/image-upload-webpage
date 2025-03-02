@@ -15,7 +15,7 @@ pub struct Claims {
 #[derive(Clone)]
 pub struct JwtConfig {
     secret: String,
-    expiration: i64,
+    pub expiration: i64,
 }
 
 impl JwtConfig {

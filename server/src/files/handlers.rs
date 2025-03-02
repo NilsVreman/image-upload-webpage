@@ -1,4 +1,4 @@
-use crate::app;
+use crate::config;
 
 use super::{
     errors::FileUploadError,
@@ -93,7 +93,7 @@ pub async fn get_thumbnail(Path(name): Path<String>) -> Result<ImageResponse, Fi
 }
 
 pub async fn get_all_thumbnails(
-    Extension(general_config): Extension<app::GeneralConfig>,
+    Extension(general_config): Extension<config::GeneralConfig>,
 ) -> Result<Json<ImageList>, FileUploadError> {
     Ok(Json(ImageList {
         images: storage::get_all_thumbnail_names()
