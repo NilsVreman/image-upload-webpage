@@ -71,15 +71,15 @@ pub async fn write_image(
     file_name: &FileName,
     image_buffer: &body::Bytes,
 ) -> Result<(), ImageError> {
-    tokio::fs::write(get_file_path(&file_name, ImageType::Image)?, &image_buffer)
+    tokio::fs::write(get_file_path(file_name, ImageType::Image)?, &image_buffer)
         .await
-        .map_err(|err| ImageError::IoError(err))
+        .map_err(ImageError::IoError)
 }
 
 pub fn write_thumbnail(file_name: &FileName, image_buffer: &body::Bytes) -> Result<(), ImageError> {
-    image::load_from_memory(&image_buffer)?
+    image::load_from_memory(image_buffer)?
         .thumbnail(MAX_THUMBNAILS_SIZE, MAX_THUMBNAILS_SIZE)
-        .save(get_file_path(&file_name, ImageType::Thumbnail)?)
+        .save(get_file_path(file_name, ImageType::Thumbnail)?)
 }
 
 pub async fn get_all_thumbnail_names() -> io::Result<Vec<String>> {
@@ -106,7 +106,7 @@ async fn get_all_names(image_type: ImageType) -> io::Result<Vec<String>> {
 async fn get_file(name: &String, image_type: ImageType) -> io::Result<body::Bytes> {
     tokio::fs::read(get_folder(image_type)?.join(name))
         .await
-        .map(|bytes| body::Bytes::from(bytes))
+        .map(body::Bytes::from)
 }
 
 fn get_folder(image_type: ImageType) -> io::Result<PathBuf> {
