@@ -13,22 +13,22 @@ export const useImageStore = defineStore("imageStore", () => {
   const images = ref<ImageMetaData[]>([]);
 
   const updateImageMetaData = async () => {
-    const imageData = await api
+    const imageData: ImageMetaData[] = await api
       .get("/images/thumbnails")
-      .then((response) => response.data.images)
-      .catch((err) => {
+      .then(response => response.data.images)
+      .catch(err => {
         console.error("Error fetching images:", err);
       });
 
-    const existingImageNames = new Set(images.value.map((image) => image.name));
+    const existingImageNames = new Set(images.value.map(image => image.name));
     const newImages = imageData.filter(
-      (image) => !existingImageNames.has(image.name),
+      image => !existingImageNames.has(image.name),
     );
     images.value.unshift(...newImages);
   };
 
   const uploadImages = async (files: File[]) => {
-    files.forEach(async (file) => {
+    files.forEach(async file => {
       const formData = new FormData();
       formData.append("files", file);
 
@@ -38,7 +38,7 @@ export const useImageStore = defineStore("imageStore", () => {
             "Content-Type": "multipart/form-data",
           },
         })
-        .catch((err) => {
+        .catch(err => {
           console.error("Error fetching images:", err);
         });
     });

@@ -18,7 +18,12 @@
     "strict": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
-    "noFallthroughCasesInSwitch": true
+    "noFallthroughCasesInSwitch": true,
+
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["src/*"]
+    }
   },
   "extends": "@vue/tsconfig/tsconfig.dom.json",
   "include": ["src/**/*.ts", "src/**/*.tsx", "src/**/*.vue"]
