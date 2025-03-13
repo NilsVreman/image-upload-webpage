@@ -3,6 +3,7 @@ use std::env;
 
 #[derive(Clone)]
 pub struct GeneralConfig {
+    // FIXME: This is a temporary fix to make the server run on localhost
     pub host: String,
     pub port: u16,
     pub client_url: String,
