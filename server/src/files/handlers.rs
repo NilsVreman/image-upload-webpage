@@ -1,5 +1,3 @@
-use crate::config;
-
 use super::{
     errors::FileUploadError,
     storage::{self, Sanitize},
@@ -9,7 +7,6 @@ use axum::{
     body,
     extract::{multipart::Field, Json, Multipart, Path},
     response::{IntoResponse, Response},
-    Extension,
 };
 use hyper::StatusCode;
 use serde::Serialize;
@@ -92,9 +89,7 @@ pub async fn get_thumbnail(Path(name): Path<String>) -> Result<ImageResponse, Fi
     })
 }
 
-pub async fn get_all_thumbnails(
-    Extension(general_config): Extension<config::GeneralConfig>,
-) -> Result<Json<ImageList>, FileUploadError> {
+pub async fn get_all_thumbnails() -> Result<Json<ImageList>, FileUploadError> {
     Ok(Json(ImageList {
         images: storage::get_all_thumbnail_names()
             .await
@@ -102,14 +97,8 @@ pub async fn get_all_thumbnails(
             .iter()
             .map(|name| ImageMetaData {
                 name: name.clone(),
-                image_url: format!(
-                    "{}:{}/images/{}",
-                    general_config.host, general_config.port, name
-                ),
-                thumbnail_url: format!(
-                    "{}:{}/images/{}/thumbnail",
-                    general_config.host, general_config.port, name
-                ),
+                image_url: format!("/images/{}", name),
+                thumbnail_url: format!("/images/{}/thumbnail", name),
             })
             .collect(),
     }))

@@ -5,7 +5,7 @@
       <input
         type="file"
         multiple
-        :accept="acceptedMimeTypes"
+        :accept="acceptedMimeTypes.join(',')"
         @change="handleFileUpload"
       />
     </label>
@@ -21,7 +21,7 @@ const imageStore = useImageStore();
 // Handle file selection
 const handleFileUpload = async (event: Event) => {
   const target = event.target as HTMLInputElement;
-  const validImages = imageStore.filterValidImages(target.files);
+  const validImages = imageStore.filterValidImages(target.files ?? undefined);
   await imageStore.uploadImages(validImages);
 };
 </script>

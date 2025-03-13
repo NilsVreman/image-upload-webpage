@@ -1,26 +1,12 @@
 use axum::{
     extract::{Request, State},
-    http::{HeaderValue, StatusCode},
+    http::StatusCode,
     middleware::Next,
     response::{IntoResponse, Response},
 };
 use axum_extra::extract::CookieJar;
-use hyper::{header, Method};
-use tower_http::cors::CorsLayer;
 
-use super::{auth, config};
-
-pub fn cors_middleware(general_config: config::GeneralConfig) -> CorsLayer {
-    CorsLayer::new()
-        .allow_origin(general_config.client_url.parse::<HeaderValue>().unwrap())
-        .allow_methods(vec![Method::GET, Method::POST])
-        .allow_headers(vec![
-            header::ACCEPT,
-            header::CONTENT_TYPE,
-            header::AUTHORIZATION,
-        ])
-        .allow_credentials(true)
-}
+use super::auth;
 
 enum AuthError {
     InvalidToken,
