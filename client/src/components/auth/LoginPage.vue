@@ -62,7 +62,7 @@ const handleLogin = () =>
       username: username.value,
       password: password.value,
     })
-    .then(response => {
+    .then(() => {
       // server sets the HTTPOnly cookie with the jwt token
       // recheck the session to verify cookie validity
       checkSession();
