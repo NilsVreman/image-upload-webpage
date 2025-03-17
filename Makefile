@@ -2,7 +2,7 @@
 CLIENT_DIR = client
 SERVER_DIR = server
 
-.PHONY: help lint-client lint-server build-client build-server build-server-prod move-assets run-server all
+.PHONY: help lint-client lint-server lint build-client build-server build-server-prod move-assets run-server run-server-prod build run
 
 help:
 	@echo "Makefile targets:"
@@ -20,6 +20,8 @@ lint-client:
 
 lint-server:
 	cd $(SERVER_DIR) && cargo clippy
+
+lint: lint-client lint-server
 
 build-client:
 	cd $(CLIENT_DIR) && npm run build
@@ -40,3 +42,9 @@ run-server:
 
 run-server-prod:
 	cd $(SERVER_DIR) && cargo run --release
+
+build:
+	docker build -t image-website .
+
+run:
+	docker run -p 3000:3000 image-website
