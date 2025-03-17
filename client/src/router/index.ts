@@ -23,7 +23,7 @@ const pageRouter = createRouter({
 });
 
 // Global Navigation Guard
-pageRouter.beforeEach(async (to, _from) => {
+pageRouter.beforeEach(async to => {
   if (to.meta.requiresAuth) {
     try {
       const response = await api.get("/check-session");
