@@ -1,0 +1,42 @@
+name: Pipeline Checks
+run-name: Checks on behalf of ${{ github.triggering_actor }}
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "18"
+
+      - name: Install Node dependencies
+        working-directory: ./client
+        run: npm install
+
+      - name: Set up Rust
+        uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: stable
+          components: rustfmt, clippy
+
+      - name: Fetch Rust dependencies
+        working-directory: ./server
+        run: cargo fetch
+
+      - name: Lint Client
+        run: make lint-client
+
+      - name: Lint Server
+        run: make lint-server
