@@ -35,7 +35,10 @@ pub async fn create_app() -> Result<Router, String> {
         ServeDir::new("assets").not_found_service(ServeFile::new("assets/not_found.html"));
 
     // With fallback_service we serve assets directly from the root
-    Ok(api_routes.fallback_service(serve_dir))
+    // Add a Content-Security-Policy header to all responses
+    Ok(api_routes
+        .fallback_service(serve_dir)
+        .layer(middleware::content_security_policy_layer()))
 }
 
 async fn health_handler() -> Json<serde_json::Value> {

@@ -1,12 +1,16 @@
 use axum::{
     extract::{Request, State},
-    http::StatusCode,
+    http::{header::CONTENT_SECURITY_POLICY, HeaderValue, StatusCode},
     middleware::Next,
     response::{IntoResponse, Response},
 };
 use axum_extra::extract::CookieJar;
+use tower_http::set_header::SetResponseHeaderLayer;
 
 use super::auth;
+
+const CSP_HEADER_VALUE: &str =
+    "default-src 'self'; script-src 'self'; img-src 'self'; style-src 'self';";
 
 enum AuthError {
     InvalidToken,
@@ -38,4 +42,11 @@ pub async fn auth_middleware(
         Ok(_claims) => next.run(req).await,
         _ => AuthError::InvalidToken.into_response(),
     }
+}
+
+pub fn content_security_policy_layer() -> SetResponseHeaderLayer<HeaderValue> {
+    SetResponseHeaderLayer::if_not_present(
+        CONTENT_SECURITY_POLICY,
+        HeaderValue::from_str(CSP_HEADER_VALUE).expect("Invalid CSP header"),
+    )
 }
