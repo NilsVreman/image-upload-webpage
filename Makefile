@@ -2,7 +2,7 @@
 CLIENT_DIR = client
 SERVER_DIR = server
 
-.PHONY: help lint-client lint-server lint build-client build-server build-server-prod move-assets run-server run-server-prod build run
+.PHONY: help lint-client lint-server lint build-client build-server build-server-prod move-assets run-server run-server-prod build up down
 
 help:
 	@echo "Makefile targets:"
@@ -14,6 +14,9 @@ help:
 	@echo "  move-assets       - Move assets from $(CLIENT_DIR)/dist to $(SERVER_DIR)/assets"
 	@echo "  run-server        - Run the server (cargo run in $(SERVER_DIR))"
 	@echo "  run-server-prod   - Run the server in production mode (cargo run --release in $(SERVER_DIR))"
+	@echo "  build             - Build the Docker images using Docker Compose"
+	@echo "  up                - Create and start Docker containers in detached mode using Docker Compose"
+	@echo "  down              - Stop and remove Docker containers using Docker Compose"
 
 lint-client:
 	cd $(CLIENT_DIR) && npm run lint
@@ -44,7 +47,10 @@ run-server-prod:
 	cd $(SERVER_DIR) && cargo run --release
 
 build:
-	docker build -t image-website .
+	COMPOSE_BAKE=true docker compose build
 
-run:
-	docker run -p 3000:3000 image-website
+up:
+	docker compose up -d
+
+down:
+	docker compose down
