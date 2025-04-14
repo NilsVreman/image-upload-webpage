@@ -4,7 +4,7 @@
 
 1. ~~Input sanitization~~
 2. ~~Authentication and Authorization~~
-3. Rate limiting
+3. ~~Rate limiting~~
 4. Caching
 5. Logging
 6. Pagination
