@@ -16,7 +16,6 @@ async fn run_server() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
     let app = server::create_app().await?;
     let config = server::Config::from_env();
     let port = config.port;
-    // FIXME: This is a temporary fix to make the server run on localhost
     let addr = SocketAddr::new(Ipv4Addr::UNSPECIFIED.into(), port);
 
     // Run our app

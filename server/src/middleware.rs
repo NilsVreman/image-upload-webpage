@@ -1,3 +1,5 @@
+use std::time::Duration;
+
 use axum::{
     extract::{Request, State},
     http::{header::CONTENT_SECURITY_POLICY, HeaderValue, StatusCode},
@@ -5,12 +7,14 @@ use axum::{
     response::{IntoResponse, Response},
 };
 use axum_extra::extract::CookieJar;
+use tower::limit::RateLimitLayer;
 use tower_http::set_header::SetResponseHeaderLayer;
 
 use super::auth;
 
 const CSP_HEADER_VALUE: &str =
     "default-src 'self'; script-src 'self'; img-src 'self'; style-src 'self';";
+const REQUESTS_PER_SECOND: u64 = 5;
 
 enum AuthError {
     InvalidToken,
@@ -49,4 +53,8 @@ pub fn content_security_policy_layer() -> SetResponseHeaderLayer<HeaderValue> {
         CONTENT_SECURITY_POLICY,
         HeaderValue::from_str(CSP_HEADER_VALUE).expect("Invalid CSP header"),
     )
+}
+
+pub fn rate_limiting_layer() -> RateLimitLayer {
+    RateLimitLayer::new(REQUESTS_PER_SECOND, Duration::from_secs(1))
 }

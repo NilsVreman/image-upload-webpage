@@ -2,11 +2,14 @@ use super::auth;
 use super::files;
 use super::middleware;
 
+use axum::error_handling::HandleErrorLayer;
 use axum::middleware::from_fn_with_state;
-use axum::Extension;
-use axum::{routing::get, Json, Router};
-use tower_http::services::ServeDir;
-use tower_http::services::ServeFile;
+use axum::routing::get;
+use axum::{BoxError, Extension, Json, Router};
+use hyper::StatusCode;
+use tower::buffer::BufferLayer;
+use tower::ServiceBuilder;
+use tower_http::services::{ServeDir, ServeFile};
 
 pub async fn create_app() -> Result<Router, String> {
     files::setup().await.map_err(|err| err.to_string())?;
@@ -35,10 +38,22 @@ pub async fn create_app() -> Result<Router, String> {
         ServeDir::new("assets").not_found_service(ServeFile::new("assets/not_found.html"));
 
     // With fallback_service we serve assets directly from the root
-    // Add a Content-Security-Policy header to all responses
+    // 1. Add a Content-Security-Policy header to all responses.
+    // 2. Add a rate limiter to all requests.
     Ok(api_routes
         .fallback_service(serve_dir)
-        .layer(middleware::content_security_policy_layer()))
+        .layer(middleware::content_security_policy_layer())
+        .layer(
+            ServiceBuilder::new()
+                .layer(HandleErrorLayer::new(|err: BoxError| async move {
+                    (
+                        StatusCode::INTERNAL_SERVER_ERROR,
+                        format!("Unhandled error: {}", err),
+                    )
+                }))
+                .layer(BufferLayer::new(1024))
+                .layer(middleware::rate_limiting_layer()),
+        ))
 }
 
 async fn health_handler() -> Json<serde_json::Value> {
