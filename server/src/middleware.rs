@@ -2,12 +2,13 @@ use std::time::Duration;
 
 use axum::{
     extract::{Request, State},
-    http::{header::CONTENT_SECURITY_POLICY, HeaderValue, StatusCode},
+    http::{header::CONTENT_SECURITY_POLICY, HeaderValue, Method, StatusCode, Uri},
     middleware::Next,
     response::{IntoResponse, Response},
+    BoxError,
 };
 use axum_extra::extract::CookieJar;
-use tower::limit::RateLimitLayer;
+use tower::{limit::RateLimitLayer, timeout::TimeoutLayer};
 use tower_http::set_header::SetResponseHeaderLayer;
 
 use super::auth;
@@ -15,6 +16,7 @@ use super::auth;
 const CSP_HEADER_VALUE: &str =
     "default-src 'self'; script-src 'self'; img-src 'self'; style-src 'self';";
 const REQUESTS_PER_SECOND: u64 = 5;
+const REQUEST_TIMEOUT_SECS: u64 = 2;
 
 enum AuthError {
     InvalidToken,
@@ -55,6 +57,22 @@ pub fn content_security_policy_layer() -> SetResponseHeaderLayer<HeaderValue> {
     )
 }
 
+pub async fn handle_error(_method: Method, _uri: Uri, err: BoxError) -> (StatusCode, String) {
+    match err {
+        err if err.is::<tower::timeout::error::Elapsed>() => {
+            (StatusCode::REQUEST_TIMEOUT, "Request timed out".to_string())
+        }
+        _ => (
+            StatusCode::INTERNAL_SERVER_ERROR,
+            format!("Unhandled error: {}", err),
+        ),
+    }
+}
+
 pub fn rate_limiting_layer() -> RateLimitLayer {
     RateLimitLayer::new(REQUESTS_PER_SECOND, Duration::from_secs(1))
+}
+
+pub fn request_timeout_layer() -> TimeoutLayer {
+    TimeoutLayer::new(Duration::from_secs(REQUEST_TIMEOUT_SECS))
 }
