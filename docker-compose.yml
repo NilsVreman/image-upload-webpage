@@ -1,8 +1,6 @@
 services:
   server:
-    build:
-      context: .
-      dockerfile: Dockerfile
+    build: .
     ports:
       - "3000:3000"
     volumes:
