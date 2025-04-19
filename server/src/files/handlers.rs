@@ -1,7 +1,7 @@
-use super::{
-    errors::FileUploadError,
-    storage::{self, Sanitize},
-};
+use std::str::FromStr;
+
+use super::errors::FileError;
+use super::storage::{self, FileName, Sanitize};
 
 use axum::{
     body,
@@ -14,7 +14,7 @@ use serde::Serialize;
 pub const MAX_UPLOAD_SIZE: usize = 50 * 1024 * 1024; // 50 MB
 
 #[derive(Serialize)]
-pub struct ImageMetaData {
+struct ImageMetaData {
     name: String,
     image_url: String,
     thumbnail_url: String,
@@ -36,64 +36,67 @@ impl IntoResponse for ImageResponse {
     }
 }
 
-pub async fn post_image_list(
-    mut images: Multipart,
-) -> Result<Json<serde_json::Value>, FileUploadError> {
-    while let Some(file) = images
-        .next_field()
-        .await
-        .map_err(|err| FileUploadError::MultipartError(err.to_string()))?
-    {
+pub async fn post_image_list(mut images: Multipart) -> Result<Json<ImageList>, FileError> {
+    let mut uploaded_images: Vec<FileName> = Vec::new();
+
+    while let Some(file) = images.next_field().await.map_err(FileError::Multipart)? {
         assert_image_validity(&file)?;
 
         let sanitized_name = file
             .file_name()
             .sanitize()
-            .ok_or(FileUploadError::InvalidContentType("file_name".to_string()))?;
+            .ok_or(FileError::InvalidContentType("file_name"))?;
 
-        let image_data = file
-            .bytes()
-            .await
-            .map_err(|err| FileUploadError::ReadFileError(err.to_string()))?;
+        uploaded_images.push(sanitized_name.clone());
+
+        let image_data = file.bytes().await.map_err(FileError::Multipart)?;
 
         storage::write_image(&sanitized_name, &image_data)
             .await
-            .map_err(|err| FileUploadError::WriteFileError(err.to_string()))?;
+            .map_err(FileError::WriteFile)?;
 
         tokio::spawn(async move { storage::write_thumbnail(&sanitized_name, &image_data) })
             .await
             .unwrap()
-            .map_err(|err| FileUploadError::WriteFileError(err.to_string()))?;
+            .map_err(FileError::WriteFile)?;
     }
 
-    Ok(Json(serde_json::json!(
-        { "msg": "Files uploaded successfully".to_string() }
-    )))
+    Ok(Json(ImageList {
+        images: uploaded_images
+            .iter()
+            .map(|file_name| ImageMetaData {
+                name: file_name.sanitized_name.clone(),
+                uploaded_at: file_name.uploaded_at,
+                image_url: format!("/images/{}", file_name),
+                thumbnail_url: format!("/images/{}/thumbnail", file_name),
+            })
+            .collect(),
+    }))
 }
 
-pub async fn get_image(Path(name): Path<String>) -> Result<ImageResponse, FileUploadError> {
+pub async fn get_image(Path(name): Path<String>) -> Result<ImageResponse, FileError> {
     Ok(ImageResponse {
         status: StatusCode::OK,
         bytes: storage::get_image(&name)
             .await
-            .map_err(|err| FileUploadError::ReadFileError(err.to_string()))?,
+            .map_err(FileError::ReadFile)?,
     })
 }
 
-pub async fn get_thumbnail(Path(name): Path<String>) -> Result<ImageResponse, FileUploadError> {
+pub async fn get_thumbnail(Path(name): Path<String>) -> Result<ImageResponse, FileError> {
     Ok(ImageResponse {
         status: StatusCode::OK,
         bytes: storage::get_thumbnail(&name)
             .await
-            .map_err(|err| FileUploadError::ReadFileError(err.to_string()))?,
+            .map_err(FileError::ReadFile)?,
     })
 }
 
-pub async fn get_all_thumbnails() -> Result<Json<ImageList>, FileUploadError> {
+pub async fn get_all_thumbnails() -> Result<Json<ImageList>, FileError> {
     Ok(Json(ImageList {
         images: storage::get_all_thumbnail_names()
             .await
-            .map_err(|err| FileUploadError::ReadFileError(err.to_string()))?
+            .map_err(FileError::ReadFile)?
             .iter()
             .map(|name| ImageMetaData {
                 name: name.clone(),
@@ -104,23 +107,19 @@ pub async fn get_all_thumbnails() -> Result<Json<ImageList>, FileUploadError> {
     }))
 }
 
-fn assert_image_validity(field: &Field) -> Result<(), FileUploadError> {
+fn assert_image_validity(field: &Field) -> Result<(), FileError> {
     field
         .file_name()
         .sanitize()
-        .ok_or(FileUploadError::InvalidContentType("file_name".to_string()))?;
+        .ok_or(FileError::InvalidContentType("file_name"))?;
 
     if field
         .content_type()
-        .ok_or(FileUploadError::InvalidContentType(
-            "content_type".to_string(),
-        ))?
+        .ok_or(FileError::InvalidContentType("content_type"))?
         .starts_with("image/")
     {
         return Ok(());
     }
 
-    Err(FileUploadError::InvalidContentType(
-        "content_type".to_string(),
-    ))
+    Err(FileError::InvalidContentType("content_type"))
 }

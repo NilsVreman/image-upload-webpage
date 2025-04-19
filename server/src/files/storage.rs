@@ -4,6 +4,8 @@ use image::ImageError;
 use std::{io, path::PathBuf};
 use uuid::Uuid;
 
+use super::errors::ParseError;
+
 const MAX_THUMBNAILS_SIZE: u32 = 100;
 static BAD_CHARS: &[char] = &[
     '.', '/', '\\', ' ', '!', '<', '>', '|', ':', '(', ')', '&', ';', '#', '?', '*',
