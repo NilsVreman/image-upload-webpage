@@ -1,7 +1,8 @@
 use axum::body;
+use chrono::{DateTime, SecondsFormat, Utc};
 use core::fmt;
 use image::ImageError;
-use std::{io, path::PathBuf};
+use std::{io, path::PathBuf, str::FromStr};
 use uuid::Uuid;
 
 use super::errors::ParseError;
@@ -10,6 +11,16 @@ const MAX_THUMBNAILS_SIZE: u32 = 100;
 static BAD_CHARS: &[char] = &[
     '.', '/', '\\', ' ', '!', '<', '>', '|', ':', '(', ')', '&', ';', '#', '?', '*',
 ];
+
+trait Pipe: Sized {
+    fn pipe<F, R>(self, f: F) -> R
+    where
+        F: FnOnce(Self) -> R,
+    {
+        f(self)
+    }
+}
+impl<T> Pipe for T {}
 
 enum ImageType {
     Image,
@@ -25,15 +36,67 @@ impl fmt::Display for ImageType {
     }
 }
 
+#[derive(Debug, Clone)]
 pub struct FileName {
-    sanitized_name: String,
+    pub sanitized_name: String,
+    pub uploaded_at: DateTime<Utc>,
     extension: String,
     id: Uuid,
 }
 
 impl fmt::Display for FileName {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{}_{}.{}", self.sanitized_name, self.id, self.extension)
+        write!(
+            f,
+            "{}_{}_{}.{}",
+            self.uploaded_at.to_rfc3339_opts(SecondsFormat::Secs, true),
+            self.sanitized_name,
+            self.id,
+            self.extension,
+        )
+    }
+}
+
+impl FromStr for FileName {
+    type Err = ParseError;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        // split once, then pull each field in order
+        let mut parts = s.split('_');
+
+        // let _test = parts.next();
+        let uploaded_at = parts
+            .next()
+            .ok_or(ParseError::FileName("missing timestamp"))?
+            .pipe(DateTime::parse_from_rfc3339)
+            .map(DateTime::<Utc>::from)?;
+
+        let sanitized_name = parts
+            .next()
+            .ok_or(ParseError::FileName("missing file stem"))?
+            .to_owned();
+
+        let mut tail = parts
+            .next()
+            .ok_or(ParseError::FileName("missing uuid+extension"))?
+            .split('.');
+
+        let id = tail
+            .next()
+            .ok_or(ParseError::FileName("missing uuid"))?
+            .parse::<Uuid>()?;
+
+        let extension = tail
+            .next()
+            .ok_or(ParseError::FileName("missing extension"))?
+            .to_owned();
+
+        Ok(FileName {
+            sanitized_name,
+            extension,
+            uploaded_at,
+            id,
+        })
     }
 }
 
@@ -45,8 +108,10 @@ impl Sanitize for Option<&str> {
     fn sanitize(&self) -> Option<FileName> {
         let bad_char = |c| BAD_CHARS.contains(&c) || c.is_control();
 
-        // get the first non-empty substring that doesn't contain bad characters
-        let file_name = self.and_then(|n| n.split(bad_char).find(|s| !s.is_empty()))?;
+        // get the first non-empty substring that doesn't contain bad characters (replace _ with - )
+        let file_name = self
+            .and_then(|n| n.split(bad_char).find(|&s| !s.is_empty()))?
+            .replace('_', "-");
         let file_extension = self.and_then(|n| n.rsplit_once('.')).map(|(_, ext)| ext)?;
 
         if file_name.is_empty() {
@@ -56,6 +121,7 @@ impl Sanitize for Option<&str> {
         Some(FileName {
             sanitized_name: file_name.to_string(),
             extension: file_extension.to_string(),
+            uploaded_at: Utc::now(),
             id: Uuid::new_v4(),
         })
     }

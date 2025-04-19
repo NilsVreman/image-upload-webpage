@@ -57,5 +57,5 @@ pub async fn create_app() -> Result<Router, String> {
 }
 
 async fn health_handler() -> Json<serde_json::Value> {
-    Json(serde_json::json!({"health": "OK"}))
+    Json(serde_json::json!({"health": "OK", "ts": chrono::Utc::now()}))
 }
