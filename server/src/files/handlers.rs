@@ -1,3 +1,4 @@
+use std::borrow::Borrow;
 use std::str::FromStr;
 
 use super::errors::FileError;
@@ -20,6 +21,22 @@ struct ImageMetaData {
     uploaded_at: DateTime<Utc>,
     image_url: String,
     thumbnail_url: String,
+}
+
+impl<T> From<T> for ImageMetaData
+where
+    T: Borrow<FileName>,
+{
+    fn from(value: T) -> Self {
+        let file_name: &FileName = value.borrow();
+
+        ImageMetaData {
+            name: file_name.to_string(),
+            uploaded_at: file_name.uploaded_at,
+            image_url: format!("/images/{}", file_name),
+            thumbnail_url: format!("/images/{}/thumbnail", file_name),
+        }
+    }
 }
 
 #[derive(Serialize)]
@@ -64,15 +81,7 @@ pub async fn post_image_list(mut images: Multipart) -> Result<Json<ImageList>, F
     }
 
     Ok(Json(ImageList {
-        images: uploaded_images
-            .iter()
-            .map(|file_name| ImageMetaData {
-                name: file_name.sanitized_name.clone(),
-                uploaded_at: file_name.uploaded_at,
-                image_url: format!("/images/{}", file_name),
-                thumbnail_url: format!("/images/{}/thumbnail", file_name),
-            })
-            .collect(),
+        images: uploaded_images.iter().map(ImageMetaData::from).collect(),
     }))
 }
 
@@ -102,12 +111,7 @@ pub async fn get_all_thumbnails() -> Result<Json<ImageList>, FileError> {
             .iter()
             .map(|name| {
                 FileName::from_str(name)
-                    .map(|file_name| ImageMetaData {
-                        name: file_name.sanitized_name,
-                        uploaded_at: file_name.uploaded_at,
-                        image_url: format!("/images/{}", name),
-                        thumbnail_url: format!("/images/{}/thumbnail", name),
-                    })
+                    .map(ImageMetaData::from)
                     .expect("could not get data from file_name")
             })
             .collect(),
