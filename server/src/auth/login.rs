@@ -67,7 +67,7 @@ async fn login_handler(
 
     let cookie = Cookie::parse(format!(
         "token={}; HttpOnly; Max-Age={}; SameSite=Strict; Secure",
-        token, jwt_config.expiration
+        token, jwt_config.expiration_secs
     ))
     .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
 

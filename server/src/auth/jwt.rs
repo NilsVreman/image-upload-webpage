@@ -15,7 +15,7 @@ pub struct Claims {
 #[derive(Clone)]
 pub struct JwtConfig {
     secret: String,
-    pub expiration: i64,
+    pub expiration_secs: i64,
 }
 
 impl JwtConfig {
@@ -24,7 +24,7 @@ impl JwtConfig {
 
         Self {
             secret: env::var("JWT_SECRET").expect("JWT_SECRET must be set"),
-            expiration: env::var("JWT_EXPIRATION_TIME")
+            expiration_secs: env::var("JWT_EXPIRATION_TIME")
                 .and_then(|var| var.parse::<i64>().map_err(|_| env::VarError::NotPresent))
                 .expect("JWT_EXPIRATION_TIME must be set"),
         }
@@ -33,7 +33,7 @@ impl JwtConfig {
 
 pub fn create_jwt(subject: &str, jwt_config: &JwtConfig) -> Result<String, JwtError> {
     let expiration = Utc::now()
-        .checked_add_signed(Duration::minutes(jwt_config.expiration))
+        .checked_add_signed(Duration::seconds(jwt_config.expiration_secs))
         .expect("valid timestamp")
         .timestamp() as usize;
 

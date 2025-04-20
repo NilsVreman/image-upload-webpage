@@ -15,7 +15,7 @@ fn setup_test_env() -> TempDir {
     env::set_current_dir(&tmp_dir).expect("failed to set current dir");
 
     env::set_var("JWT_SECRET", "testsecret");
-    env::set_var("JWT_EXPIRATION_TIME", "60"); // expiration in minutes
+    env::set_var("JWT_EXPIRATION_TIME", "3600"); // expiration in seconds
 
     // hash the password "password123" with a low cost for testing.
     let hashed = bcrypt::hash("password123", 4).expect("failed to hash password");
