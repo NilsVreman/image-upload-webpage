@@ -1,5 +1,8 @@
 <template>
-  <ScrollBar direction="horizontal">
+  <HorizontalScrollContainer
+    :active-scale="1.5"
+    :element-height="100"
+  >
     <img
       v-for="(img, idx) in thumbs"
       :key="idx"
@@ -8,16 +11,15 @@
       :alt="img.name"
       loading="lazy"
     />
-  </ScrollBar>
+  </HorizontalScrollContainer>
 </template>
 
 <script setup lang="ts">
 import { computed, onMounted } from "vue";
 import { useImageStore } from "@/stores/imageStore";
 import { storeToRefs } from "pinia";
-import ScrollBar from "@/components/ui/ScrollBar.vue";
+import HorizontalScrollContainer from "@/components/ui/HorizontalScrollContainer.vue";
 
-/* Images */
 const props = defineProps({
   maxThumbnails: {
     type: Number,
@@ -38,7 +40,7 @@ onMounted(async () => await imageStore.updateImageMetaData());
   flex: 0 0 auto;
   width: 100px;
   height: 100px;
-  margin-right: 0.75rem;
+  margin: 0.5rem;
   object-fit: cover;
   border: solid 1px black;
   border-radius: 0.25rem;
