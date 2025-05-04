@@ -1,23 +1,23 @@
 <template>
-  <div class="thumbnails">
-    <div
-      v-for="(image, index) in displayedImages"
-      :key="index"
-      class="thumbnail"
-    >
-      <img
-        :src="image.thumbnail_url"
-        :alt="image.name"
-      />
-    </div>
-  </div>
+  <ScrollBar direction="horizontal">
+    <img
+      v-for="(img, idx) in thumbs"
+      :key="idx"
+      class="thumb"
+      :src="img.thumbnail_url"
+      :alt="img.name"
+      loading="lazy"
+    />
+  </ScrollBar>
 </template>
 
 <script setup lang="ts">
 import { computed, onMounted } from "vue";
 import { useImageStore } from "@/stores/imageStore";
 import { storeToRefs } from "pinia";
+import ScrollBar from "@/components/ui/ScrollBar.vue";
 
+/* Images */
 const props = defineProps({
   maxThumbnails: {
     type: Number,
@@ -28,36 +28,19 @@ const props = defineProps({
 const imageStore = useImageStore();
 const { images } = storeToRefs(imageStore);
 
-const displayedImages = computed(() =>
-  images.value.slice(0, props.maxThumbnails),
-);
+const thumbs = computed(() => images.value.slice(0, props.maxThumbnails));
 
 onMounted(async () => await imageStore.updateImageMetaData());
 </script>
 
 <style scoped>
-.thumbnails {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
-  gap: 10px;
-  margin-top: 10px;
-}
-
-.thumbnail {
-  position: relative;
-  width: 100%;
-  padding-top: 100%;
-  overflow: hidden;
-  border: 1px solid #ccc;
-  box-sizing: border-box;
-}
-
-.thumbnail img {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
+.thumb {
+  flex: 0 0 auto;
+  width: 100px;
+  height: 100px;
+  margin-right: 0.75rem;
   object-fit: cover;
+  border: solid 1px black;
+  border-radius: 0.25rem;
 }
 </style>
