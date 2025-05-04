@@ -20,6 +20,7 @@
     "@types/node": "^22.14.1",
     "@vitejs/plugin-vue": "^5.2.3",
     "@vue/tsconfig": "^0.5.1",
+    "axios-mock-adapter": "^2.1.0",
     "eslint-config-prettier": "^9.1.0",
     "eslint-plugin-prettier": "^5.2.6",
     "eslint-plugin-vue": "^9.33.0",
