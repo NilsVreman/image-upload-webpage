@@ -1,5 +1,5 @@
 <template>
-  <HamburgerDrawer :items="navItems" />
+  <HamburgerDrawer />
 
   <main class="wrapper">
     <h1>Share your wedding photos</h1>
@@ -13,11 +13,6 @@
 <script setup lang="ts">
 import ImageUploader from "@/components/image/ImageUploader.vue";
 import ThumbnailPreviewer from "@/components/image/ThumbnailPreviewer.vue";
-
-const navItems = [
-  { label: "Home", to: "/" },
-  { label: "Gallery", to: "/gallery" },
-];
 </script>
 
 <style scoped>

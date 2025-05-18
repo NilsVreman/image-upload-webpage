@@ -4,6 +4,7 @@ import {
   type RouteRecordRaw,
 } from "vue-router";
 import api from "@/services/api";
+import { menuLinks, type NavigationLink } from "@/constants/navLinks";
 
 const routes: RouteRecordRaw[] = [
   {
@@ -11,12 +12,13 @@ const routes: RouteRecordRaw[] = [
     name: "login",
     component: () => import("@/components/pages/LoginPage.vue"),
   },
-  {
-    path: "/",
-    name: "landing",
-    component: () => import("@/components/pages/LandingPage.vue"),
+  ...Array.from(menuLinks).map((link: NavigationLink) => ({
+    name: link.label,
+    path: link.path,
+    component: () =>
+      import(/* @vite-ignore */ `../components/pages/${link.page}`),
     meta: { requiresAuth: true },
-  },
+  })),
 ];
 
 const pageRouter = createRouter({

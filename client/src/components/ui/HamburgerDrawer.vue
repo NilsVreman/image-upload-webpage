@@ -32,10 +32,10 @@
         @keydown.esc="toggle"
       >
         <a
-          v-for="link in props.items"
-          :key="link.to"
+          v-for="link in menuLinks"
+          :key="link.path"
           class="nav-link"
-          :href="link.to"
+          :href="link.path"
           @click="toggle"
         >
           {{ link.label }}
@@ -48,10 +48,7 @@
 <script setup lang="ts">
 import { ref, onMounted, onBeforeUnmount } from "vue";
 import { useFocusTrap } from "@vueuse/integrations/useFocusTrap";
-
-const props = defineProps<{
-  items: { label: string; to: string }[];
-}>();
+import { menuLinks } from "@/constants/navLinks";
 
 const isOpen = ref(false);
 function toggle() {
