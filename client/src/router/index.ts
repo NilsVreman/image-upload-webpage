@@ -1,18 +1,20 @@
-import { createRouter, createWebHistory } from "vue-router";
+import {
+  createRouter,
+  createWebHistory,
+  type RouteRecordRaw,
+} from "vue-router";
 import api from "@/services/api";
-import LoginPage from "@/components/auth/LoginPage.vue";
-import ImagePage from "@/components/image/ImagePage.vue";
 
-const routes = [
+const routes: RouteRecordRaw[] = [
   {
     path: "/login",
     name: "login",
-    component: LoginPage,
+    component: () => import("@/components/pages/LoginPage.vue"),
   },
   {
     path: "/",
-    name: "home",
-    component: ImagePage,
+    name: "landing",
+    component: () => import("@/components/pages/LandingPage.vue"),
     meta: { requiresAuth: true },
   },
 ];
