@@ -4,7 +4,7 @@
     class="scrollbar"
     :style="{
       '--active-scale': props.activeScale,
-      '--max-height': `${props.activeScale * props.elementHeight}px`,
+      '--max-height': `${(props.activeScale + 0.25) * props.elementHeight}px`,
     }"
   >
     <slot />
@@ -63,6 +63,8 @@ onBeforeUnmount(() => host.value?.removeEventListener("scroll", onScroll));
 
 <style scoped>
 .scrollbar {
+  max-width: 100%;
+  contain: layout;
   display: flex;
   flex-direction: row;
   align-items: center;
@@ -76,7 +78,7 @@ onBeforeUnmount(() => host.value?.removeEventListener("scroll", onScroll));
   overflow-y: hidden;
   scroll-snap-type: x mandatory;
 
-  padding-inline: 50%; /* physical space */
+  padding-inline: 50%;
 }
 
 .scrollbar ::v-deep(*) {
