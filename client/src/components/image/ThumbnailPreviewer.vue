@@ -1,6 +1,6 @@
 <template>
   <HorizontalScrollContainer
-    :active-scale="1.5"
+    :active-scale="2.0"
     :element-height="100"
   >
     <img
@@ -37,7 +37,6 @@ onMounted(async () => await imageStore.updateImageMetaData());
 
 <style scoped>
 .thumb {
-  flex: 0 0 auto;
   width: 100px;
   height: 100px;
   margin: 0.5rem;
