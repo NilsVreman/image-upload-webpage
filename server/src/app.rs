@@ -39,8 +39,7 @@ pub async fn create_app() -> Result<Router, String> {
 
     // ### Services and general middleware layers ### //
     // Create a service to serve static files from the `assets` folder.
-    let serve_dir =
-        ServeDir::new("assets").not_found_service(ServeFile::new("assets/not_found.html"));
+    let serve_dir = ServeDir::new("assets").not_found_service(ServeFile::new("assets/index.html"));
 
     // With fallback_service we serve assets directly from the root
     // 1. Add a Content-Security-Policy header to all responses.

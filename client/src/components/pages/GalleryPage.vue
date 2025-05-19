@@ -42,7 +42,7 @@ function openLightbox(i: number) {
 
 <style scoped>
 .gallery {
-  width: min(60rem, 100vw);
+  width: min(60rem, 80vw);
   margin-inline: auto;
   padding: 1.5rem;
   display: flex;
