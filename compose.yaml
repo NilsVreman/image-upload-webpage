@@ -1,0 +1,47 @@
+services:
+  # My Web Application
+  webapp:
+    build: .
+    expose:
+      - "3000"
+    volumes:
+      - ./server/images:/app/images
+      - ./server/thumbnails:/app/thumbnails
+    networks:
+      - webnet
+
+  # Reverse proxy
+  nginx:
+    image: nginx:stable-alpine
+    env_file: .env
+    environment:
+      - DOMAIN=${DOMAIN}
+    volumes:
+      - ./nginx/templates:/etc/nginx/templates:ro
+      - ./nginx/options:/etc/nginx/options:ro
+      - ./nginx/certs:/etc/letsencrypt
+      - ./nginx/www:/usr/share/nginx/html
+    ports:
+      - "80:80" # HTTP
+      - "443:443" # HTTPS
+    depends_on:
+      - webapp
+    networks:
+      - webnet
+
+  # Helper to obtain and renew certificates
+  certbot:
+    image: certbot/certbot:latest
+    env_file: .env
+    environment:
+      - DOMAIN=${DOMAIN}
+      - LE_EMAIL=${LE_EMAIL}
+    volumes:
+      - ./nginx/certs:/etc/letsencrypt
+      - ./nginx/www:/usr/share/nginx/html
+    networks:
+      - webnet
+
+networks:
+  webnet:
+    driver: bridge
