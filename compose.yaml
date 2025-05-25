@@ -13,14 +13,17 @@ services:
   # Reverse proxy
   nginx:
     image: nginx:stable-alpine
+    env_file: .env
+    environment:
+      - DOMAIN=${DOMAIN}
+    volumes:
+      - ./nginx/templates:/etc/nginx/templates:ro
+      - ./nginx/options:/etc/nginx/options:ro
+      - ./nginx/certs:/etc/letsencrypt
+      - ./nginx/www:/usr/share/nginx/html
     ports:
       - "80:80" # HTTP
       - "443:443" # HTTPS
-    volumes:
-      - ./nginx/conf.d:/etc/nginx/conf.d:ro
-      - ./nginx/certs:/etc/letsencrypt
-      - ./nginx/conf.d/options:/etc/nginx/options:ro
-      - ./nginx/www:/usr/share/nginx/html
     depends_on:
       - webapp
     networks:
@@ -29,6 +32,10 @@ services:
   # Helper to obtain and renew certificates
   certbot:
     image: certbot/certbot:latest
+    env_file: .env
+    environment:
+      - DOMAIN=${DOMAIN}
+      - LE_EMAIL=${LE_EMAIL}
     volumes:
       - ./nginx/certs:/etc/letsencrypt
       - ./nginx/conf.d:/etc/nginx/conf.d
