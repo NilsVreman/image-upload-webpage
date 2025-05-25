@@ -38,7 +38,6 @@ services:
       - LE_EMAIL=${LE_EMAIL}
     volumes:
       - ./nginx/certs:/etc/letsencrypt
-      - ./nginx/conf.d:/etc/nginx/conf.d
       - ./nginx/www:/usr/share/nginx/html
     networks:
       - webnet
