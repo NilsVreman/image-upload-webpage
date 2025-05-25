@@ -18,8 +18,9 @@ services:
       - "443:443" # HTTPS
     volumes:
       - ./nginx/conf.d:/etc/nginx/conf.d:ro
-      - ./nginx/certs:/etc/letsencrypt # certs live here
-      - ./nginx/conf.d/options:/etc/nginx/options:ro # HSTS etc (optional)
+      - ./nginx/certs:/etc/letsencrypt
+      - ./nginx/conf.d/options:/etc/nginx/options:ro
+      - ./nginx/www:/usr/share/nginx/html
     depends_on:
       - webapp
     networks:
@@ -31,7 +32,7 @@ services:
     volumes:
       - ./nginx/certs:/etc/letsencrypt
       - ./nginx/conf.d:/etc/nginx/conf.d
-    entrypoint: /bin/sh
+      - ./nginx/www:/usr/share/nginx/html
     networks:
       - webnet
 
