@@ -48,5 +48,4 @@ pageRouter.beforeEach(async to => {
   return true;
 });
 
-// FIXME: Need to figure out a way to resend some validation request if timeout occurs
 export default pageRouter;
