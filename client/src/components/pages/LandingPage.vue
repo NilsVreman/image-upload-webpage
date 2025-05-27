@@ -1,5 +1,5 @@
 <template>
-  <HamburgerDrawer />
+  <HamburgerMenu />
 
   <main class="wrapper">
     <h1>Share your wedding photos</h1>

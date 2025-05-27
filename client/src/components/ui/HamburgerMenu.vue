@@ -63,8 +63,6 @@ onBeforeUnmount(deactivate);
 </script>
 
 <style scoped>
-@import "@/style.css";
-
 .hamburger {
   position: fixed;
   top: 1rem;

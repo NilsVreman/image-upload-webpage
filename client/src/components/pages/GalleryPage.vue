@@ -1,5 +1,5 @@
 <template>
-  <HamburgerDrawer />
+  <HamburgerMenu />
 
   <main class="gallery">
     <h1>Gallery</h1>
