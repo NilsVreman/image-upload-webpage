@@ -20,7 +20,7 @@ defineProps<{
 }>();
 
 defineEmits<{
-  (e: "select", index: number): void;
+  (event: "select", imageIndex: number): void;
 }>();
 </script>
 
@@ -39,6 +39,6 @@ defineEmits<{
   transition: opacity 0.15s;
 }
 .thumb:hover {
-  opacity: 0.8;
+  opacity: 0.7;
 }
 </style>

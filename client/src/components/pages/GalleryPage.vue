@@ -10,9 +10,9 @@
     />
 
     <ImageLightbox
-      v-model:open="lightboxOpen"
-      :images="fullSize"
-      :index="lightboxIndex"
+      v-model:open="isLightboxOpen"
+      :images="imageUrls"
+      :image-index="activeImageIndex"
     />
   </main>
 </template>
@@ -21,7 +21,6 @@
 import { ref, computed, onMounted } from "vue";
 import { useImageStore } from "@/stores/imageStore";
 import { storeToRefs } from "pinia";
-
 import GalleryGrid from "@/components/image/GalleryGrid.vue";
 import ImageLightbox from "@/components/image/ImageLightbox.vue";
 
@@ -30,13 +29,13 @@ const { images } = storeToRefs(store);
 onMounted(async () => await store.updateImageMetaData());
 
 /* lightbox state */
-const lightboxOpen = ref(false);
-const lightboxIndex = ref(0);
-const fullSize = computed(() => images.value.map(i => i.image_url));
+const isLightboxOpen = ref(false);
+const activeImageIndex = ref(0);
+const imageUrls = computed(() => images.value.map(i => i.image_url));
 
 function openLightbox(i: number) {
-  lightboxIndex.value = i;
-  lightboxOpen.value = true;
+  activeImageIndex.value = i;
+  isLightboxOpen.value = true;
 }
 </script>
 
