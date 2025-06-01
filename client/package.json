@@ -10,27 +10,28 @@
     "lint": "eslint --ext .ts,.tsx,.js,.vue src"
   },
   "dependencies": {
-    "@vueuse/integrations": "^13.2.0",
-    "axios": "^1.8.4",
+    "@types/node": "^22.15.29",
+    "@vitejs/plugin-vue": "^5.2.4",
+    "@vue/tsconfig": "^0.7.0",
+    "@vueuse/integrations": "^13.3.0",
+    "axios": "^1.9.0",
+    "focus-trap": "^7.6.5",
     "path": "^0.12.7",
     "pinia": "^2.3.1",
-    "vue": "^3.5.13",
+    "typescript": "^5.8.3",
+    "vite": "^6.3.5",
+    "vue": "^3.5.15",
     "vue-easy-lightbox": "^1.19.0",
-    "vue-router": "^4.5.0"
+    "vue-router": "^4.5.1",
+    "vue-tsc": "^2.2.10"
   },
   "devDependencies": {
-    "@types/node": "^22.14.1",
-    "@vitejs/plugin-vue": "^5.2.3",
-    "@vue/tsconfig": "^0.5.1",
     "axios-mock-adapter": "^2.1.0",
     "eslint-config-prettier": "^9.1.0",
-    "eslint-plugin-prettier": "^5.2.6",
+    "eslint-plugin-prettier": "^5.4.0",
     "eslint-plugin-vue": "^9.33.0",
     "prettier": "^3.5.3",
-    "typescript": "^5.8.3",
-    "typescript-eslint": "^8.30.1",
-    "vite": "^6.3.2",
-    "vue-eslint-parser": "^9.4.3",
-    "vue-tsc": "^2.2.8"
+    "typescript-eslint": "^8.33.0",
+    "vue-eslint-parser": "^9.4.3"
   }
 }
