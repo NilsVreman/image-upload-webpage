@@ -10,6 +10,7 @@
     "lint": "eslint --ext .ts,.tsx,.js,.vue src"
   },
   "dependencies": {
+    "@primeuix/themes": "^1.1.1",
     "@types/node": "^22.15.29",
     "@vitejs/plugin-vue": "^5.2.4",
     "@vue/tsconfig": "^0.7.0",
@@ -18,6 +19,8 @@
     "focus-trap": "^7.6.5",
     "path": "^0.12.7",
     "pinia": "^2.3.1",
+    "primeicons": "^7.0.0",
+    "primevue": "^4.3.4",
     "typescript": "^5.8.3",
     "vite": "^6.3.5",
     "vue": "^3.5.15",

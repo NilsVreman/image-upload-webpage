@@ -1,52 +1,47 @@
 <template>
   <HamburgerMenu />
 
-  <main class="gallery">
+  <div class="gallery-page">
     <h1>Gallery</h1>
 
     <GalleryGrid
       :images="images"
-      @select="openLightbox"
+      @select-image="openViewer"
     />
-
-    <ImageLightbox
-      v-model:open="isLightboxOpen"
-      :images="imageUrls"
-      :image-index="activeImageIndex"
+    <ImageViewer
+      v-model="isViewerOpen"
+      :images="images"
+      :selected-index="selectedIndex"
     />
-  </main>
+  </div>
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from "vue";
+import { ref, onMounted } from "vue";
 import { useImageStore } from "@/stores/imageStore";
 import { storeToRefs } from "pinia";
 import GalleryGrid from "@/components/image/GalleryGrid.vue";
-import ImageLightbox from "@/components/image/ImageLightbox.vue";
+import ImageViewer from "@/components/image/ImageViewer.vue";
 
-const store = useImageStore();
-const { images } = storeToRefs(store);
-onMounted(async () => await store.updateImageMetaData());
+const imageStore = useImageStore();
+const { images } = storeToRefs(imageStore);
 
-/* lightbox state */
-const isLightboxOpen = ref(false);
-const activeImageIndex = ref(0);
-const imageUrls = computed(() => images.value.map(i => i.image_url));
+const selectedIndex = ref(0);
+const isViewerOpen = ref(false);
 
-function openLightbox(i: number) {
-  activeImageIndex.value = i;
-  isLightboxOpen.value = true;
+async function openViewer(index: number) {
+  selectedIndex.value = index;
+  isViewerOpen.value = true;
 }
+
+onMounted(async () => {
+  // Fetch the latest image metadata from the server
+  await imageStore.updateImageMetaData();
+});
 </script>
 
 <style scoped>
-.gallery {
-  width: min(60rem, 80vw);
-  margin-inline: auto;
-  padding: 1.5rem;
-  display: flex;
-  flex-direction: column;
-  gap: 1.5rem;
-  min-height: 100vh;
+.gallery-page {
+  padding: 1rem;
 }
 </style>
