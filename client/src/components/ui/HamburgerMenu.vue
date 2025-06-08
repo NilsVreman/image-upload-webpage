@@ -69,7 +69,7 @@ onBeforeUnmount(deactivate);
   left: 1rem;
   z-index: 60;
   background: none;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 2px solid rgba(255, 255, 255, 0.5);
   padding: 0.5rem;
   cursor: pointer;
   color: inherit;
