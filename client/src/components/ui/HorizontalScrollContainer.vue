@@ -54,7 +54,6 @@ const onScroll = () => {
     ticking = false;
   });
 };
-
 onMounted(() =>
   host.value?.addEventListener("scroll", onScroll, { passive: true }),
 );
@@ -72,6 +71,7 @@ onBeforeUnmount(() => host.value?.removeEventListener("scroll", onScroll));
 
   scrollbar-gutter: stable; /* no layout shift */
   overscroll-behavior: contain; /* stop scroll chaining */
+  -webkit-overflow-scrolling: touch; /* smooth scrolling on iOS */
   scroll-behavior: smooth;
 
   overflow-x: auto;
@@ -81,18 +81,15 @@ onBeforeUnmount(() => host.value?.removeEventListener("scroll", onScroll));
   padding-inline: 50%;
 }
 
-.scrollbar ::v-deep(*) {
-  scroll-snap-align: center;
-}
-
 /* any child with .is‑active gets scaled */
-.scrollbar ::v-deep(.is-active) {
+.scrollbar::v-deep(.is-active) {
   transform: scale(var(--active-scale));
   z-index: 1;
 }
 
 /* Smooth size transition */
-.scrollbar ::v-deep(*) {
+.scrollbar::v-deep(*) {
+  scroll-snap-align: center;
   transition: transform 0.25s;
 }
 </style>
