@@ -1,15 +1,15 @@
 import { createApp } from "vue";
 import { createPinia } from "pinia";
-import pageRouter from "./router";
-import HamburgerDrawer from "@/components/ui/HamburgerDrawer.vue";
 
-import "./style.css";
-import App from "./App.vue";
+import "@/style.css";
+import pageRouter from "@/routers";
+import HamburgerMenu from "@/components/ui/HamburgerMenu.vue";
+import App from "@/App.vue";
 
 const app = createApp(App);
 const pinia = createPinia();
 
-app.component("HamburgerDrawer", HamburgerDrawer);
+app.component("HamburgerMenu", HamburgerMenu);
 
 app.use(pinia);
 app.use(pageRouter);

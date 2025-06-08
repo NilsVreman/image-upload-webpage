@@ -8,13 +8,24 @@ html {
 }
 
 :root {
+  --body-bg: rgb(36, 36, 36);
+  --body-text-color: rgba(255, 255, 255, 0.95);
+  --card-border: 1px solid transparent;
+  --card-bg: transparent;
+  --border-color: rgba(255, 255, 255, 0.1);
+  --text-color: var(--body-text-color);
+  --overlay-background: rgba(0, 0, 0, 0.5);
+  --button-color: rgb(60, 179, 113);
+  --button-hover-color: rgba(60, 179, 113, 0.7);
+  --button-overlay: rgba(60, 179, 113, 0.25);
+
   font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;
   font-weight: 400;
 
   color-scheme: dark light;
-  color: rgba(255, 255, 255, 0.87);
-  background-color: #242424;
+  color: var(--body-text-color);
+  background-color: var(--body-bg);
 
   font-synthesis: none;
   text-rendering: optimizeLegibility;
@@ -44,17 +55,17 @@ h1 {
 
 button {
   border-radius: 8px;
-  border: 1px solid transparent;
+  border: 1px solid black;
   padding: 0.6em 1.2em;
   font-size: 1em;
   font-weight: 500;
   font-family: inherit;
-  background-color: #3cb371;
+  background-color: var(--button-color);
   cursor: pointer;
   transition: border-color 0.25s;
 }
 button:hover {
-  border-color: #646cff;
+  background-color: var(--button-hover-color);
 }
 button:focus,
 button:focus-visible {
@@ -62,7 +73,11 @@ button:focus-visible {
 }
 
 .card {
-  padding: 2em;
+  background: var(--card-bg);
+  border: var(--card-border);
+  padding: 0rem;
+  border-radius: 10px;
+  margin-bottom: 1rem;
 }
 
 #app {

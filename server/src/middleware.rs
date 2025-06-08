@@ -13,8 +13,7 @@ use tower_http::set_header::SetResponseHeaderLayer;
 
 use super::auth;
 
-const CSP_HEADER_VALUE: &str =
-    "default-src 'self'; script-src 'self'; img-src 'self'; style-src 'self';";
+const CSP_HEADER_VALUE: &str = "script-src 'self'; img-src 'self';";
 const REQUESTS_PER_SECOND: u64 = 5;
 const REQUEST_TIMEOUT_SECS: u64 = 2;
 

@@ -45,7 +45,10 @@ move-assets:
 	mkdir -p $(SERVER_DIR)/assets
 	cp -r $(CLIENT_DIR)/dist/* $(SERVER_DIR)/assets/
 
-.PHONY: run-server
+.PHONY: build-local
+build-local: build-client move-assets build-server
+
+.PHONY: run-local
 run-server:
 	cd $(SERVER_DIR) && cargo run --release
 

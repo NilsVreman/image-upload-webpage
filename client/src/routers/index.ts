@@ -13,8 +13,14 @@ const routes: RouteRecordRaw[] = [
   },
   {
     path: "/",
-    name: "landing",
+    name: "home",
     component: () => import("@/components/pages/LandingPage.vue"),
+    meta: { requiresAuth: true },
+  },
+  {
+    path: "/gallery",
+    name: "gallery",
+    component: () => import("@/components/pages/GalleryPage.vue"),
     meta: { requiresAuth: true },
   },
 ];
@@ -42,5 +48,4 @@ pageRouter.beforeEach(async to => {
   return true;
 });
 
-// FIXME: Need to figure out a way to resend some validation request if timeout occurs
 export default pageRouter;

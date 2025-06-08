@@ -11,13 +11,16 @@
       width="24"
       height="24"
       stroke="currentColor"
+      fill="none"
+      stroke-linecap="round"
+      stroke-width="3"
     >
       <!-- prettier-ignore -->
-      <line x1="3" y1="7" x2="21" y2="7" />
+      <line x1="3" y1="5" x2="21" y2="5" />
       <!-- prettier-ignore -->
-      <line x1="3" y1="14" x2="21" y2="14" />
+      <line x1="3" y1="12" x2="21" y2="12" />
       <!-- prettier-ignore -->
-      <line x1="3" y1="21" x2="21" y2="21" />
+      <line x1="3" y1="19" x2="21" y2="19" />
     </svg>
   </button>
 
@@ -32,10 +35,10 @@
         @keydown.esc="toggle"
       >
         <a
-          v-for="link in props.items"
-          :key="link.to"
+          v-for="link in menuLinks"
+          :key="link.path"
           class="nav-link"
-          :href="link.to"
+          :href="link.path"
           @click="toggle"
         >
           {{ link.label }}
@@ -48,10 +51,7 @@
 <script setup lang="ts">
 import { ref, onMounted, onBeforeUnmount } from "vue";
 import { useFocusTrap } from "@vueuse/integrations/useFocusTrap";
-
-const props = defineProps<{
-  items: { label: string; to: string }[];
-}>();
+import { menuLinks } from "@/constants/navLinks";
 
 const isOpen = ref(false);
 function toggle() {
@@ -66,18 +66,26 @@ onBeforeUnmount(deactivate);
 </script>
 
 <style scoped>
-@import "@/style.css";
-
 .hamburger {
   position: fixed;
-  top: 1rem;
-  left: 1rem;
   z-index: 60;
-  background: none;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  display: grid;
+  place-content: center;
+  color: var(--button-color);
+  background: transparent;
+  border: 2px solid var(--button-color);
   padding: 0.5rem;
   cursor: pointer;
-  color: inherit;
+  transition:
+    color 0.15s linear,
+    border-color 0.15s linear,
+    outline-color 0.15s linear,
+    box-shadow 0.15s linear;
+}
+
+.hamburger:hover {
+  color: var(--button-hover-color);
+  border-color: var(--button-hover-color);
 }
 
 .menu {
@@ -103,6 +111,9 @@ onBeforeUnmount(deactivate);
 }
 .nav-link:hover {
   opacity: 0.8;
+}
+.nav-link:first-child {
+  padding-top: 1em;
 }
 
 /* slide animation */
