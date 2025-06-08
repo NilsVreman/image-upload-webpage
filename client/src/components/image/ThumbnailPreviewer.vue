@@ -24,7 +24,6 @@
 import { computed, onMounted } from "vue";
 import { useImageStore } from "@/stores/imageStore";
 import { storeToRefs } from "pinia";
-import HorizontalScrollContainer from "@/components/ui/HorizontalScrollContainer.vue";
 
 const props = defineProps({
   maxThumbnails: {

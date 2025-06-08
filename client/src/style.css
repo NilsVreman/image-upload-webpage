@@ -8,13 +8,21 @@ html {
 }
 
 :root {
+  --body-bg: rgb(36, 36, 36);
+  --body-text-color: rgba(255, 255, 255, 0.95);
+  --card-border: 1px solid transparent;
+  --card-bg: transparent;
+  --border-color: rgba(255, 255, 255, 0.1);
+  --text-color: var(--body-text-color);
+  --overlay-background: rgba(0, 0, 0, 0.5);
+
   font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;
   font-weight: 400;
 
   color-scheme: dark light;
-  color: rgba(255, 255, 255, 0.87);
-  background-color: #242424;
+  color: var(--body-text-color);
+  background-color: var(--body-bg);
 
   font-synthesis: none;
   text-rendering: optimizeLegibility;
@@ -62,7 +70,11 @@ button:focus-visible {
 }
 
 .card {
-  padding: 2em;
+  background: var(--card-bg);
+  border: var(--card-border);
+  padding: 0rem;
+  border-radius: 10px;
+  margin-bottom: 1rem;
 }
 
 #app {

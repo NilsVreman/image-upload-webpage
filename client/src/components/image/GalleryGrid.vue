@@ -21,8 +21,7 @@
 </template>
 
 <script setup lang="ts">
-import type { ImageMetaData } from "@/stores/imageStore";
-import DeferredContent from "primevue/deferredcontent";
+import { type ImageMetaData } from "@/stores/imageStore";
 
 defineProps<{
   images: ImageMetaData[];

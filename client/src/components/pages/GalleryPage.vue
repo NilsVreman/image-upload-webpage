@@ -20,8 +20,6 @@
 import { ref, onMounted } from "vue";
 import { useImageStore } from "@/stores/imageStore";
 import { storeToRefs } from "pinia";
-import GalleryGrid from "@/components/image/GalleryGrid.vue";
-import ImageViewer from "@/components/image/ImageViewer.vue";
 
 const imageStore = useImageStore();
 const { images } = storeToRefs(imageStore);

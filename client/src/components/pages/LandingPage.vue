@@ -10,11 +10,6 @@
   </main>
 </template>
 
-<script setup lang="ts">
-import ImageUploader from "@/components/image/ImageUploader.vue";
-import ThumbnailPreviewer from "@/components/image/ThumbnailPreviewer.vue";
-</script>
-
 <style scoped>
 .wrapper {
   width: min(80%, 80vw); /* never exceeds the viewport */
