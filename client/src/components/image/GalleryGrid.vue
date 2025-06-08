@@ -7,15 +7,12 @@
       class="grid-item"
       @click="$emit('select-image', idx)"
     >
-      <!--eslint-enable-->
-      <DeferredContent @load="null">
-        <img
-          :src="img.thumbnail_url"
-          :alt="img.name"
-          class="thumb"
-          loading="lazy"
-        />
-      </DeferredContent>
+      <img
+        :src="img.thumbnail_url"
+        :alt="img.name"
+        class="thumb"
+        loading="lazy"
+      />
     </div>
   </div>
 </template>
