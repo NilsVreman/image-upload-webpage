@@ -13,7 +13,7 @@ use chrono::{DateTime, Utc};
 use hyper::StatusCode;
 use serde::Serialize;
 
-pub const MAX_UPLOAD_SIZE: usize = 50 * 1024 * 1024; // 50 MB
+pub const MAX_UPLOAD_SIZE: usize = 100 * 1024 * 1024; // 100 MB
 
 #[derive(Serialize)]
 struct ImageMetaData {
