@@ -69,6 +69,6 @@
 13. ~~Improve tab name (currently "Vite + Vue + TS")~~
 14. ~~Make larger images/videos uploadable.~~
 15. ~~Remove the annoying "download" message on iPhone~~
-16. Indicator that images are being processed
+16. ~~Indicator that images are being processed~~
 17. Video support
 18. Support additional mime types
