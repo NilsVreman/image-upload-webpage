@@ -14,8 +14,8 @@ use tower_http::set_header::SetResponseHeaderLayer;
 use super::auth;
 
 const CSP_HEADER_VALUE: &str = "script-src 'self'; img-src 'self';";
-const REQUESTS_PER_SECOND: u64 = 5;
-const REQUEST_TIMEOUT_SECS: u64 = 2;
+const REQUESTS_PER_SECOND: u64 = 10;
+const REQUEST_TIMEOUT_SECS: u64 = 30;
 
 enum AuthError {
     InvalidToken,
