@@ -1,8 +1,5 @@
 # image-upload-webpage
 
-> [!NOTE]
-> THE LINODE IS POWERED OFF
-
 ## How To set up next time
 
 1. Create a virtual environment (I used [Linode](https://cloud.linode.com/))
@@ -63,12 +60,15 @@
 4. ~~Background processing of thumbnails~~ -- Solved by compiling with a higher optimization level
 5. ~~Don't retrieve all thumbnails on upload (filter)~~
 6. ~~Introduce TLS~~
-7. Double check the JWT expiration time
-8. Caching
-9. Indicator that images are being processed
-10. Video support
-11. Make the _gallery_-scroll on phone swipeable, not just clickable.
-12. Prevent gallery images from being movable.
-13. Lazily load high-quality images in gallery
-14. Make sure that upload button works.
-15. Improve tab name (currently "Vite + Vue + TS")
+7. ~~Make the _gallery_-scroll on phone swipeable, not just clickable.~~
+8. ~~Double check the JWT expiration time~~
+9. ~~Caching~~
+10. ~~Prevent gallery images from being movable.~~
+11. ~~Lazily load high-quality images in gallery~~
+12. ~~Make sure that upload button works.~~
+13. ~~Improve tab name (currently "Vite + Vue + TS")~~
+14. ~~Make larger images/videos uploadable.~~
+15. ~~Remove the annoying "download" message on iPhone~~
+16. ~~Indicator that images are being processed~~
+17. Video support
+18. Support additional mime types

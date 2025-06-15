@@ -57,6 +57,7 @@ impl IntoResponse for ImageResponse {
 
 pub async fn post_image_list(mut images: Multipart) -> Result<Json<ImageList>, FileError> {
     let mut uploaded_images: Vec<FileName> = Vec::new();
+    let mut upload_tasks = Vec::new();
 
     while let Some(file) = images.next_field().await.map_err(FileError::Multipart)? {
         assert_image_validity(&file)?;
@@ -70,14 +71,25 @@ pub async fn post_image_list(mut images: Multipart) -> Result<Json<ImageList>, F
 
         let image_data = file.bytes().await.map_err(FileError::Multipart)?;
 
-        storage::write_image(&sanitized_name, &image_data)
-            .await
-            .map_err(FileError::WriteFile)?;
+        upload_tasks.push(tokio::spawn({
+            let name = sanitized_name.clone();
+            let bytes = image_data.clone();
+            async move {
+                storage::write_image(&name, &bytes)
+                    .await
+                    .map_err(FileError::WriteFile)
+            }
+        }));
+        upload_tasks.push(tokio::task::spawn_blocking({
+            let name = sanitized_name.clone();
+            let bytes = image_data.clone();
+            move || storage::write_thumbnail(&name, &bytes).map_err(FileError::WriteFile)
+        }));
+    }
 
-        tokio::spawn(async move { storage::write_thumbnail(&sanitized_name, &image_data) })
-            .await
-            .unwrap()
-            .map_err(FileError::WriteFile)?;
+    // Await all upload tasks
+    for handle in upload_tasks {
+        handle.await??
     }
 
     Ok(Json(ImageList {

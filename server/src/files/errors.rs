@@ -19,6 +19,9 @@ pub enum FileError {
 
     #[error("Failed to read file data: {0}")]
     ReadFile(#[from] io::Error),
+
+    #[error("Failed to join: {0}")]
+    Join(#[from] tokio::task::JoinError),
 }
 
 #[derive(Error, Debug)]
@@ -37,7 +40,9 @@ impl response::IntoResponse for FileError {
     fn into_response(self) -> response::Response {
         let code = match &self {
             Self::Multipart(_) | Self::InvalidContentType(_) => StatusCode::BAD_REQUEST,
-            Self::ReadFile(_) | Self::WriteFile(_) => StatusCode::INTERNAL_SERVER_ERROR,
+            Self::ReadFile(_) | Self::WriteFile(_) | Self::Join(_) => {
+                StatusCode::INTERNAL_SERVER_ERROR
+            }
         };
 
         (code, Json(serde_json::json!({"error": self.to_string()}))).into_response()

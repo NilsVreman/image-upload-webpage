@@ -26,6 +26,7 @@ const sortbyDateDesc = (arr: ImageMetaData[]) =>
 export const useImageStore = defineStore("imageStore", () => {
   const uploadedImages = ref<ImageMetaData[]>([]);
   const allUploadedImages = ref<ImageMetaData[]>([]);
+  const isUploading = ref(false);
 
   /**
    * exported list:
@@ -61,23 +62,30 @@ export const useImageStore = defineStore("imageStore", () => {
     const formData = new FormData();
     files.forEach(file => formData.append("files", file));
 
-    const uploadedData = await api
-      .post("/images", formData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      })
-      .then(response => mapToImageMetaData(response.data.images))
-      .catch(error => {
-        console.error("Error uploading images:", error);
-        return [];
-      });
+    isUploading.value = true;
 
-    // Overwrite the uploaded images with the new ones
-    uploadedImages.value = uploadedData;
+    try {
+      console.log("Uploading images:", files);
+      const uploadedData = await api
+        .post("/images", formData, {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        })
+        .then(response => mapToImageMetaData(response.data.images))
+        .catch(error => {
+          console.error("Error uploading images:", error);
+          return [];
+        });
 
-    // Update the server images list
-    await updateImageMetaData();
+      // Overwrite the uploaded images with the new ones
+      uploadedImages.value = uploadedData;
+
+      // Update the server images list
+      await updateImageMetaData();
+    } finally {
+      isUploading.value = false;
+    }
   };
 
   // Function to select valid files based on MIME type and size
@@ -94,5 +102,6 @@ export const useImageStore = defineStore("imageStore", () => {
     updateImageMetaData,
     uploadImages,
     filterValidImages,
+    isUploading,
   };
 });

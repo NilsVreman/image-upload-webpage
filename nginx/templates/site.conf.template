@@ -40,6 +40,7 @@ server {
 
     client_max_body_size 100M;
     proxy_request_buffering off;
+    proxy_read_timeout 300s;
 
     location / {
         proxy_pass         http://backend;
