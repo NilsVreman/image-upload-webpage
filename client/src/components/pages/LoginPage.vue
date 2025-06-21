@@ -3,16 +3,6 @@
     <h1>Login</h1>
     <form @submit.prevent="handleLogin">
       <div>
-        <label for="username">Username: </label>
-        <input
-          id="username"
-          v-model="username"
-          type="text"
-          placeholder="Enter username"
-        />
-      </div>
-
-      <div>
         <label for="password">Password: </label>
         <input
           id="password"
@@ -40,7 +30,6 @@ import api from "@/services/api";
 
 const router = useRouter();
 
-const username = ref("");
 const password = ref("");
 const errorMessage = ref("");
 
@@ -59,7 +48,6 @@ const checkSession = () =>
 const handleLogin = () =>
   api
     .post("/login", {
-      username: username.value,
       password: password.value,
     })
     .then(() => {
@@ -69,7 +57,7 @@ const handleLogin = () =>
     })
     .catch(error => {
       if (error.response && error.response.status === 401) {
-        errorMessage.value = "Username or password is incorrect.";
+        errorMessage.value = "Password is incorrect.";
       } else {
         errorMessage.value = "Login failed. Please try again.";
       }

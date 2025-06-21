@@ -30,7 +30,6 @@ impl PasswordConfig {
 
 #[derive(Deserialize)]
 pub struct LoginRequest {
-    username: String,
     password: String,
 }
 
@@ -62,8 +61,7 @@ async fn login_handler(
         Err(StatusCode::UNAUTHORIZED)?;
     };
 
-    let token = jwt::create_jwt(&login_req.username, &jwt_config)
-        .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
+    let token = jwt::create_jwt(&jwt_config).map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
 
     let cookie = Cookie::parse(format!(
         "token={}; HttpOnly; Max-Age={}; SameSite=Strict; Secure",
