@@ -50,6 +50,7 @@
 
 <script setup lang="ts">
 import { ref, onMounted, onBeforeUnmount } from "vue";
+import { onClickOutside } from "@vueuse/core";
 import { useFocusTrap } from "@vueuse/integrations/useFocusTrap";
 import { menuLinks } from "@/constants/navLinks";
 
@@ -60,6 +61,14 @@ function toggle() {
 
 const menu = ref<HTMLElement | null>(null);
 const { activate, deactivate } = useFocusTrap(menu);
+
+onClickOutside(
+  menu,
+  () => {
+    if (isOpen.value) toggle();
+  },
+  { capture: false },
+);
 
 onMounted(activate);
 onBeforeUnmount(deactivate);

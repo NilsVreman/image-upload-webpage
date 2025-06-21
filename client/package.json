@@ -13,6 +13,7 @@
     "@types/node": "^22.15.29",
     "@vitejs/plugin-vue": "^5.2.4",
     "@vue/tsconfig": "^0.7.0",
+    "@vueuse/core": "^13.4.0",
     "@vueuse/integrations": "^13.3.0",
     "axios": "^1.9.0",
     "focus-trap": "^7.6.5",

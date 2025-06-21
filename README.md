@@ -57,7 +57,7 @@
 1. ~~Input sanitization~~
 2. ~~Authentication and Authorization~~
 3. ~~Rate limiting~~
-4. ~~Background processing of thumbnails~~ -- Solved by compiling with a higher optimization level
+4. ~~Background processing of thumbnails~~ -- Solved by compiling with a higher optimization level and "awaiting all"
 5. ~~Don't retrieve all thumbnails on upload (filter)~~
 6. ~~Introduce TLS~~
 7. ~~Make the _gallery_-scroll on phone swipeable, not just clickable.~~
@@ -70,5 +70,6 @@
 14. ~~Make larger images/videos uploadable.~~
 15. ~~Remove the annoying "download" message on iPhone~~
 16. ~~Indicator that images are being processed~~
-17. Video support
-18. Support additional mime types
+17. ~~Close hamburger menu after clicking outside.~~
+18. Video support
+19. Support additional mime types
