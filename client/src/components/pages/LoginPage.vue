@@ -1,26 +1,42 @@
 <template>
-  <div class="login-container">
-    <h1>Login</h1>
-    <form @submit.prevent="handleLogin">
-      <div>
-        <label for="password">Password: </label>
-        <input
-          id="password"
-          v-model="password"
-          type="password"
-          placeholder="Enter password"
-        />
-      </div>
-
-      <button type="submit">Sign In</button>
-    </form>
-    <p
-      v-if="errorMessage"
-      class="error"
+  <main class="login-page">
+    <section
+      class="login-card"
+      role="form"
     >
-      {{ errorMessage }}
-    </p>
-  </div>
+      <h1 class="title">Login</h1>
+      <form
+        novalidate
+        @submit.prevent="handleLogin"
+      >
+        <label class="field">
+          <span class="field-label">Password</span>
+          <input
+            id="password"
+            v-model="password"
+            type="password"
+            placeholder="Password"
+            required
+            autocomplete="current-password"
+          />
+        </label>
+
+        <button
+          type="submit"
+          class="btn"
+        >
+          Sign In
+        </button>
+      </form>
+      <p
+        v-if="errorMessage"
+        class="error"
+        aria-live="assertive"
+      >
+        {{ errorMessage }}
+      </p>
+    </section>
+  </main>
 </template>
 
 <script setup>
@@ -65,24 +81,93 @@ const handleLogin = () =>
 </script>
 
 <style scoped>
-.login-container {
-  max-width: 400px;
-  margin: 0 auto;
-  padding: 2rem;
-  border: 1px solid #ccc;
-  border-radius: 6px;
+/* centres any full-screen form page */
+.login-page {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 80vh;
+  padding: 1rem;
+  background: var(--body-bg);
 }
 
-form div {
-  margin-bottom: 1rem;
+/* glassmorphism card */
+.login-card {
+  width: 100%;
+  max-width: 420px;
+  background: var(--card-bg);
+  border: var(--card-border);
+  border-radius: 1rem;
+  backdrop-filter: blur(16px) saturate(180%);
+  -webkit-backdrop-filter: blur(16px) saturate(180%);
+  padding-block: 2.5rem;
+  padding-inline: 2rem;
+  box-shadow: 0 8px 24px rgba(0 0 0 / 0.12);
 }
 
-button {
-  margin-top: 1rem;
+/* typography */
+.login-card .title {
+  margin: 0 0 1.5rem;
+  font-weight: 600;
+  text-align: center;
 }
 
+/* field block */
+.field {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 1.25rem;
+}
+.field-label {
+  margin-bottom: 0.5rem;
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: var(--text-color);
+}
+.field-input {
+  padding: 0.65rem 0.8rem;
+  border: 1px solid var(--border-color);
+  border-radius: 0.5rem;
+  background: transparent;
+  color: inherit;
+  font-size: 1rem;
+  transition:
+    border-color 0.2s,
+    box-shadow 0.2s;
+}
+.field-input:focus {
+  border-color: var(--button-color);
+  box-shadow: 0 0 0 3px var(--button-overlay);
+  outline: none;
+}
+
+/* green action button */
+.btn {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  background: var(--button-color);
+  border: none;
+  border-radius: 0.5rem;
+  color: #fff;
+  font-weight: 600;
+  font-size: 1rem;
+  cursor: pointer;
+  transition:
+    background 0.15s,
+    transform 0.15s;
+}
+.btn:hover {
+  background: var(--button-hover-color);
+}
+.btn:active {
+  transform: scale(0.97);
+}
+
+/* error feedback */
 .error {
-  color: red;
   margin-top: 1rem;
+  color: hsl(0 75% 60%);
+  font-size: 0.875rem;
+  text-align: center;
 }
 </style>

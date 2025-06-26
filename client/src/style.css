@@ -10,8 +10,8 @@ html {
 :root {
   --body-bg: rgb(36, 36, 36);
   --body-text-color: rgba(255, 255, 255, 0.95);
-  --card-border: 1px solid transparent;
-  --card-bg: transparent;
+  --card-border: 1px solid rgba(255, 255, 255, 0.05);
+  --card-bg: rgba(255, 255, 255, 0.15);
   --border-color: rgba(255, 255, 255, 0.1);
   --text-color: var(--body-text-color);
   --overlay-background: rgba(0, 0, 0, 0.5);
@@ -89,6 +89,10 @@ button:focus-visible {
 
 @media (prefers-color-scheme: light) {
   :root {
+    --body-bg: #f9f9f9;
+    --body-text-color: #213547;
+    --card-bg: rgba(255, 255, 255, 0.55);
+    --card-border: 1px solid rgba(0, 0, 0, 0.05);
     color: #213547;
     background-color: #ffffff;
   }
