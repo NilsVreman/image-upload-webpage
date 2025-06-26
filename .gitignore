@@ -30,6 +30,7 @@ pnpm-debug.log*
 lerna-debug.log*
 
 **/public/static/*.pdf
+**/data/*.json
 node_modules
 .vite
 dist

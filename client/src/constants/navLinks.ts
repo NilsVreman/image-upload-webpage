@@ -23,4 +23,9 @@ export const menuLinks: NavigationLink[] = [
     path: "/static/program.pdf",
     page: undefined,
   },
+  {
+    label: "More Fun",
+    path: "/entertainment",
+    page: "EntertainmentPage.vue",
+  },
 ];
