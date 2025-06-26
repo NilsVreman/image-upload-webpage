@@ -8,8 +8,7 @@ use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize)]
 pub struct Claims {
-    sub: String, // subject
-    exp: usize,  // expiration time (unix timestamp)
+    exp: usize, // expiration time (unix timestamp)
 }
 
 #[derive(Clone)]
@@ -31,16 +30,13 @@ impl JwtConfig {
     }
 }
 
-pub fn create_jwt(subject: &str, jwt_config: &JwtConfig) -> Result<String, JwtError> {
+pub fn create_jwt(jwt_config: &JwtConfig) -> Result<String, JwtError> {
     let expiration = Utc::now()
         .checked_add_signed(Duration::seconds(jwt_config.expiration_secs))
         .expect("valid timestamp")
         .timestamp() as usize;
 
-    let claims = Claims {
-        sub: subject.to_string(),
-        exp: expiration,
-    };
+    let claims = Claims { exp: expiration };
 
     jwt::encode(
         &jwt::Header::default(),

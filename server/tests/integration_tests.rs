@@ -58,7 +58,7 @@ async fn test_login_success_and_check_session() {
     let mut app = create_app().await.expect("failed to create app");
 
     // Prepare a valid login JSON payload.
-    let login_body = r#"{"username": "testuser", "password": "password123"}"#;
+    let login_body = r#"{"password": "password123"}"#;
 
     let login_request = Request::builder()
         .method("POST")
