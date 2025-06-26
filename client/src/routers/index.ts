@@ -23,6 +23,12 @@ const routes: RouteRecordRaw[] = [
     component: () => import("@/components/pages/GalleryPage.vue"),
     meta: { requiresAuth: true },
   },
+  {
+    path: "/entertainment",
+    name: "entertainment",
+    component: () => import("@/components/pages/EntertainmentPage.vue"),
+    meta: { requiresAuth: true },
+  },
 ];
 
 const pageRouter = createRouter({

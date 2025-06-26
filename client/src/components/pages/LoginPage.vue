@@ -39,7 +39,7 @@
   </main>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref } from "vue";
 import { useRouter } from "vue-router";
 import api from "@/services/api";
