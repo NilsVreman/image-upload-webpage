@@ -1,7 +1,7 @@
 export interface NavigationLink {
   label: string;
   path: string;
-  page: string;
+  page?: string;
 }
 
 // NOTE: Page-path must be relative to the src directory according to
@@ -17,5 +17,10 @@ export const menuLinks: NavigationLink[] = [
     label: "Gallery",
     path: "/gallery",
     page: "GalleryPage.vue",
+  },
+  {
+    label: "Program",
+    path: "/static/program.pdf",
+    page: undefined,
   },
 ];
