@@ -18,6 +18,9 @@ html {
   --button-color: rgb(60, 179, 113);
   --button-hover-color: rgba(60, 179, 113, 0.7);
   --button-overlay: rgba(60, 179, 113, 0.25);
+  --menu-bg: #2e2e2e;
+  --menu-fg: rgba(255, 255, 255, 0.95);
+  --menu-border: rgba(255, 255, 255, 0.1);
 
   font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;
@@ -93,6 +96,9 @@ button:focus-visible {
     --body-text-color: #213547;
     --card-bg: rgba(255, 255, 255, 0.55);
     --card-border: 1px solid rgba(0, 0, 0, 0.05);
+    --menu-bg: #ffffff;
+    --menu-fg: #213547;
+    --menu-border: rgba(0, 0, 0, 0.1);
     color: #213547;
     background-color: #ffffff;
   }

@@ -107,10 +107,10 @@ onBeforeUnmount(deactivate);
   display: flex;
   flex-direction: column;
   gap: 1.25rem;
-  background: #2e2e2e;
-  color: inherit;
+  background: var(--menu-bg);
+  color: var(--menu-fg);
   box-shadow: 4px 0 8px rgba(0, 0, 0, 0.4);
-  border-right: 1px solid rgba(255, 255, 255, 0.1);
+  border-right: 1px solid var(--menu-border);
 }
 .nav-link {
   font-size: 1.125rem;
@@ -137,13 +137,5 @@ onBeforeUnmount(deactivate);
 .slide-enter-to,
 .slide-leave-from {
   transform: translateX(0);
-}
-
-@media (prefers-color-scheme: light) {
-  .drawer {
-    background: #f4f4f4;
-    border-right: 1px solid rgba(0, 0, 0, 0.1);
-    box-shadow: 4px 0 8px rgba(0, 0, 0, 0.15);
-  }
 }
 </style>
