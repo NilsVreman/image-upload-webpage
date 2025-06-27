@@ -1,4 +1,6 @@
 <template>
+  <HamburgerMenu />
+
   <section class="entertainment-page">
     <h1>🎉 More Fun & Games</h1>
 
